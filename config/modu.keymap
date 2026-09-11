@@ -9,7 +9,7 @@
  * Game has no transparent keys, home-row mods, mod-taps, layer-taps or macros.
  * Its Fn key is a plain momentary layer key, not a tap/hold decision.
  *
- * 67 binding slots retained. 51..56 and unconfirmed slot 66 remain &none.
+ * 67 binding slots retained. Only 51..56 are &none placeholders; slot 66 is kept transparent on Base.
  * Arrow target in the supplied editor grid: 46=UP, 57=LEFT,58=DOWN,59=RIGHT.
  * This slot grid is NOT a new/verified physical-layout or matrix-transform file.
  * No change to GPIO, firmware module, physical trackball listener, or BLE roles.
@@ -122,7 +122,7 @@
                 /* 24..35 */ &mt LG(X) LG(C)         &hm250 LCTRL A          &hm200 LALT S           &hm200 LEFT_GUI D       &hm200 LSHFT F          &kp G                   &kp H                   &hm200 LSHFT J          &hm200 LEFT_GUI K       &hm200 LALT L           &hm250 LCTRL P          &kp APOS
                 /* 36..47 */ &kp LG(V)               &kp Z                   &kp X                   &kp C                   &kp V                   &kp Q                   &kp N                   &kp M                   &kp B                   &kp COMMA               &kp PERIOD              &kp BSLH
                 /* 48..59 */ &kp TAB                 &kp LBKT                &kp RBKT                &none                   &none                   &none                   &none                   &none                   &none                   &kp GRAVE               &mkp LCLK               &mkp RCLK
-                /* 60..66 */ &kp ESC                 &kp SPACE               &lt L_NAV CAPSLOCK      &kp ENTER               &kp BACKSPACE           &lt L_FN DEL            &none
+                /* 60..66 */ &kp ESC                 &kp SPACE               &lt L_NAV CAPSLOCK      &kp ENTER               &kp BACKSPACE           &lt L_FN DEL            &trans
             >;
         };
 
