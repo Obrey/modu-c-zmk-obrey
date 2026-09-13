@@ -2,11 +2,11 @@ include:
   - board: ms88sf3/nrf52840
     shield: modu_left
     cmake-args: >-
-      "-DZMK_EXTRA_MODULES=${GITHUB_WORKSPACE}/modu-c-firmware/modu-module;${GITHUB_WORKSPACE}/modu-c-firmware/zmk-pmw3610-driver"
+      "-DZMK_EXTRA_MODULES=${GITHUB_WORKSPACE}/modu-c-firmware/modu-module;${GITHUB_WORKSPACE}/modu-c-firmware/zmk-pmw3610-driver;${GITHUB_WORKSPACE}/local-modules/obrey-combo-boot"
     artifact-name: modu_left
 
   - board: ms88sf3/nrf52840
     shield: modu_right
     cmake-args: >-
-      "-DZMK_EXTRA_MODULES=${GITHUB_WORKSPACE}/modu-c-firmware/modu-module;${GITHUB_WORKSPACE}/modu-c-firmware/zmk-pmw3610-driver"
+      "-DZMK_EXTRA_MODULES=${GITHUB_WORKSPACE}/modu-c-firmware/modu-module;${GITHUB_WORKSPACE}/modu-c-firmware/zmk-pmw3610-driver;${GITHUB_WORKSPACE}/local-modules/obrey-combo-boot"
     artifact-name: modu_right

@@ -1,0 +1,5 @@
+$ /opt/pyvenv/bin/python scripts/validate.py
+OK: metadata matches the 67-position upstream default_transform.
+OK: every keymap layer has 67 bindings; default placeholders are at 51..56 only.
+OK: left/right build targets, pinned source revisions, and module paths are exact.
+OK: deterministic HEX normalization, UF2 structural checks, and notices are wired in.

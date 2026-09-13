@@ -1,0 +1,14 @@
+$ /opt/pyvenv/bin/python scripts/selftest.py
+Selected native UF2 for modu_left: /tmp/modu-c-selftest-ydlstxu2/packaging/native-inputs/a/modu_left.uf2
+Selected native UF2 for modu_right: /tmp/modu-c-selftest-ydlstxu2/packaging/native-inputs/b/modu_right.uf2
+Verified modu_left.uf2: 2 blocks, sha256=2c767369a752388442ad648d4f36e28dcb9efcd24706e77fdf0ad05753258886
+Verified modu_right.uf2: 2 blocks, sha256=d6e6bd2119a3a18035d1519a641b8b9547439fd12d827abf24997ea6a8c24cea
+Converting validated HEX for modu_left: /tmp/modu-c-selftest-ydlstxu2/packaging/hex-inputs/modu_left.hex
+Converting validated HEX for modu_right: /tmp/modu-c-selftest-ydlstxu2/packaging/hex-inputs/modu_right.hex
+Verified modu_left.uf2: 2 blocks, sha256=0c096f4a00674b93864cc3fac9f91d1e6d4f1fc4e4b14e2dbf8a2fdb555236a2
+Verified modu_right.uf2: 2 blocks, sha256=1be298feec57cf234955db62d7aa21934ffd9241f84e00b5d913bf03656567d9
+Selected native UF2 for modu_left: /tmp/modu-c-selftest-ydlstxu2/packaging/identical/modu_left.uf2
+Selected native UF2 for modu_right: /tmp/modu-c-selftest-ydlstxu2/packaging/identical/modu_right.uf2
+OK: HEX normalization rejects corruption and removes terminal blank lines.
+OK: UF2 magic, family ID, block tables, ranges, and address limits are enforced.
+OK: native/HEX packaging rejects missing, duplicate, and identical half outputs.

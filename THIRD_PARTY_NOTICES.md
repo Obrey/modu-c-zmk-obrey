@@ -63,3 +63,11 @@ The applicable license text is included in `LICENSES/ZMK-MIT.txt`.
 
 The GitHub Actions packaging job includes this file, the repository `LICENSE`,
 `NOTICE.md`, and the `LICENSES/` directory alongside the generated UF2 files.
+
+## Obrey combo-source behavior
+
+The new code in `local-modules/obrey-combo-boot/` is MIT-licensed; see its LICENSE.
+It calls standard ZMK behavior-dispatch APIs; no ZMK core code or MODU board
+source is replaced. The original MODU-specific material remains subject to
+the repository's non-commercial license. The module's MIT license is also
+shipped with generated firmware as `LICENSES/OBREY-COMBO-MIT.txt`.

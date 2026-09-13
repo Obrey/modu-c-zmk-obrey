@@ -5,6 +5,8 @@ name: Build MODU-C ZMK firmware
     paths:
       - "config/**"
       - "scripts/**"
+      - "local-modules/obrey-combo-boot/**"
+      - "tests/**"
       - "build.yaml"
       - ".github/workflows/build.yml"
       - "LICENSE"
@@ -15,6 +17,8 @@ name: Build MODU-C ZMK firmware
     paths:
       - "config/**"
       - "scripts/**"
+      - "local-modules/obrey-combo-boot/**"
+      - "tests/**"
       - "build.yaml"
       - ".github/workflows/build.yml"
       - "LICENSE"
@@ -43,6 +47,15 @@ jobs:
 
       - name: Run static consistency checks
         run: python3 scripts/validate.py
+
+      - name: Check direct combo integration
+        run: python3 scripts/check_combo_boot.py
+
+      - name: Test C source routing with mocked transport
+        run: python3 tests/run_host_tests.py
+
+      - name: Test repository safety checks
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
       - name: Exercise HEX and UF2 safeguards
         run: python3 scripts/selftest.py

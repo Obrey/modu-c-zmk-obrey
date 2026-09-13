@@ -22,3 +22,15 @@ It is **not** an official EKS Inc. or MODU release.
 - Added static consistency checks, license/notice packaging, and Korean setup documentation.
 
 No trademark rights, patent rights, warranty, or endorsement are provided.
+
+## Obrey rebuild (2026-09-13)
+
+Based on the uploaded `modu-c-zmk-config-main.zip`, not a live Git clone.
+The agreed Obrey five-layer keymap replaces the example three-layer keymap.
+A nested MIT-licensed combo-source observer restores the side when invoking
+the standard source-specific bootloader behavior. The root license and
+original attribution are retained. This is not an official EKS/MODU release.
+The physical firmware module pins, board names, driver paths and metadata are
+unchanged; build.yaml additionally loads the new nested behavior module.
+Source/host verification does not certify a device or substitute for flashing
+and testing on hardware.

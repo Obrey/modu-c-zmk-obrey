@@ -1,0 +1,662 @@
+--- original/.github/workflows/build.yml
++++ rebuilt/.github/workflows/build.yml
+@@ -5,6 +5,8 @@
+     paths:
+       - "config/**"
+       - "scripts/**"
++      - "local-modules/obrey-combo-boot/**"
++      - "tests/**"
+       - "build.yaml"
+       - ".github/workflows/build.yml"
+       - "LICENSE"
+@@ -15,6 +17,8 @@
+     paths:
+       - "config/**"
+       - "scripts/**"
++      - "local-modules/obrey-combo-boot/**"
++      - "tests/**"
+       - "build.yaml"
+       - ".github/workflows/build.yml"
+       - "LICENSE"
+@@ -43,6 +47,15 @@
+ 
+       - name: Run static consistency checks
+         run: python3 scripts/validate.py
++
++      - name: Check direct combo integration
++        run: python3 scripts/check_combo_boot.py
++
++      - name: Test C source routing with mocked transport
++        run: python3 tests/run_host_tests.py
++
++      - name: Test repository safety checks
++        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+ 
+       - name: Exercise HEX and UF2 safeguards
+         run: python3 scripts/selftest.py
+--- original/.gitignore
++++ rebuilt/.gitignore
+@@ -7,3 +7,5 @@
+ *.uf2
+ .DS_Store
+ Thumbs.db
++# Local reports can be regenerated, but delivered reports are intentional.
++*.backup-*/
+--- original/NOTICE.md
++++ rebuilt/NOTICE.md
+@@ -22,3 +22,15 @@
+ - Added static consistency checks, license/notice packaging, and Korean setup documentation.
+ 
+ No trademark rights, patent rights, warranty, or endorsement are provided.
++
++## Obrey rebuild (2026-09-13)
++
++Based on the uploaded `modu-c-zmk-config-main.zip`, not a live Git clone.
++The agreed Obrey five-layer keymap replaces the example three-layer keymap.
++A nested MIT-licensed combo-source observer restores the side when invoking
++the standard source-specific bootloader behavior. The root license and
++original attribution are retained. This is not an official EKS/MODU release.
++The physical firmware module pins, board names, driver paths and metadata are
++unchanged; build.yaml additionally loads the new nested behavior module.
++Source/host verification does not certify a device or substitute for flashing
++and testing on hardware.
+--- original/README.md
++++ rebuilt/README.md
+@@ -1,11 +1,163 @@
+-# MODU-C ZMK Keymap Editor config (User customed)
++# Obrey MODU-C — 원본 ZIP 기반 재구성본 4.0
+ 
+-MODU-C 원본 펌웨어 전체를 복사하는 대신, 일부 파일을 불러와 keymap editor, github actions를 사용할 수 있게 만든 레포지토리입니다.
++`22sh22/modu-c-zmk-config`에서 내려받아 이 대화에 첨부한
++`modu-c-zmk-config-main.zip`을 기반으로 구성했습니다.
++이전 설치 패치를 먼저 적용할 필요가 없는 **설정 저장소 전체**입니다.
++원본의 EKS 비상업 라이선스·저작자 표시를 유지한 비공식 개인 수정본입니다.
+ 
+-`main` 브랜치를 fork 한 후, 해당 레포지토리를 [keymap editor](https://nickcoutsos.github.io/keymap-editor/) 로 불러와 수정하십시오.
++**키맵만 따로 복사하지 마세요. `local-modules/`와 `build.yaml`이 함께 필요합니다.**
++UF2 완성 파일은 포함하지 않습니다. 실제 펌웨어는 Actions에서 빌드해야 합니다.
+ 
++## 변경 범위
+ 
++원본의 `config/west.yml`, 보드 이름, 좌우 shield, 하드웨어 소스 고정 revision,
++트랙볼 드라이버 경로, `config/modu.json`과 `config/info.json`은 그대로입니다.
++원본의 HEX 정규화, UF2 검증·패키징, 라이선스 포함 기능도 유지했습니다.
+ 
+-## 라이선스와 표시
++사용자가 이 대화에서 확정한 v3.6의 일반 키 배치 335개(5×67)를 모두 유지하고,
++부트로더 콤보의 실행 대상 처리만 확장했습니다. 따라서 원본 ZIP의 예제
++3레이어 배열로 되돌린 것은 아닙니다.
+ 
+-이 저장소의 원본 MODU 전용 코드와 키맵은 `EKS NON-COMMERCIAL SOURCE LICENSE 1.0`의 적용을 받으며 비상업적 용도로만 사용할 수 있습니다.
++| 번호 | 레이어 | 역할 |
++|---:|---|---|
++| 0 | Base | 평상시 문자·숫자·기호, 기존 왼쪽 단축키열과 홈로우 모드 |
++| 1 | Nav | 기존 이동·편집 |
++| 2 | Mouse | 기존 클릭·스크롤·키보드식 포인터 이동 |
++| 3 | Game | 일반 문자키, 독립 Ctrl/Shift/Alt, 방향키와 클릭 |
++| 4 | FnMedia | F키·미디어·연결 설정 |
++
++**Maintenance 레이어, 부트로더용 Fn/Nav 추가 조작, 백틱/대괄호 3초 홀드,
++클릭키에 얹는 부트로더 기능은 없습니다.**
++
++## 부트로더: 세 키를 함께 누르기
++
++평상시 **Base**에서 모든 키를 놓고 약 반초 쉰 다음 아래 세 키를 함께 누릅니다.
++
++| 조합 | 의도한 대상 |
++|---|---|
++| `1 + 3 + 5` | 왼쪽 반쪽 |
++| `6 + 8 + 0` | 오른쪽 반쪽 |
++
++긴 홀드나 추가 실행키는 없습니다. 세 키의 눌림이 80ms 이내에 들어오고,
++세 키 모두 눌린 상태가 되어야 합니다. `135` 또는 `680`을 한 글자씩
++눌렀다 떼며 입력하는 것과 다릅니다. 직전 일반 입력 이후 300ms 보호를 유지합니다.
++Base 숫자 1·3·5·6·8·0은 콤보 판정 때문에 조건에 따라 최대 80ms 대기가
++추가될 수 있습니다. 새 콤보는 Game/Nav/Mouse/FnMedia에서는 비활성입니다.
++
++숫자 **0은 10번 위치**, 게임 전환키는 **0번 위치**입니다. 둘을 혼동하지 마세요.
++
++### 좌우를 구분하는 방식
++
++기본 ZMK 콤보가 호출하는 `&bootloader`는 중앙 장치를 대상으로 합니다.
++여기서는 콤보가 `&boot135` / `&boot680`이라는 작은 사용자 정의 동작을 호출합니다.
++이 동작은 같은 세 키의 실제 입력 출처를 먼저 관찰하고, 표준 부트로더 명령에
++그 출처를 붙여 전달합니다. 중앙=왼쪽, 주변장치=0번처럼 고정하지 않습니다.
++관찰 실패·혼합 출처·오래된 입력·Base 이외의 실행은 거부합니다.
++전송 실패 시 다른 반쪽을 대신 재부팅하는 fallback은 없습니다.
++
++이 방식은 별도 레이어가 아니며, ZMK core나 무선 전송 프로토콜을 패치하지 않습니다.
++실제 좌우 전송·부트로더 작동은 기기에서 아직 시험하지 않았습니다.
++
++### 업데이트 순서
++
++업데이트할 반쪽을 **USB 데이터 케이블**로 PC에 연결한 상태에서 실행합니다.
++양쪽이 정상 실행·연결되어 있어야 반대쪽으로 소프트웨어 명령을 전달할 수 있습니다.
++**한쪽 진입 → 해당 UF2 설치 → 정상 재시작·재연결 확인 → 다른 쪽** 순서입니다.
++두 쪽을 동시에 부트로더로 보내려 하지 마세요. 입력 처리를 맡은 쪽이 먼저
++멈추면 다른 쪽의 콤보를 처리할 수 없습니다.
++
++새 콤보는 이 펌웨어를 처음 설치한 뒤부터 쓸 수 있습니다.
++최초 설치, 연결 손상, 펌웨어 오류 때에는 물리 리셋 방법이 여전히 필요합니다.
++부트로더 진입은 공장 초기화/블루투스 페어링 삭제가 아닙니다.
++
++## 게임 배열: 기존 합의안 유지
++
++문자 Q/B/P 등의 커스텀 위치를 포함해 기존 Base 문자 위치를 유지하며,
++Game에서는 홈로우 모드와 탭/홀드 겸용키를 제거했습니다.
++Game의 방향키는 원본 에디터 메타데이터에서 아래처럼 모입니다.
++
++```text
++                  ↑ (46)
++           ← (57) ↓ (58) → (59)
++```
++
++Game에서 마침표는 오른쪽 홈로우 맨 끝 35번입니다. Base의 마침표는 46번 그대로입니다.
++왼쪽 바깥 24/36은 Ctrl/Shift, 보조행 48은 Alt, 49는 우클릭, 50은 Fn입니다.
++왼엄지는 Esc/Space/좌클릭, 오른엄지는 Enter/Backspace/Delete입니다.
++Game Fn(50)을 누른 채 숫자 1~0은 F1~F10, 최상단 양끝은 F11/F12입니다.
++FnMedia가 Game 위에 있어 F키가 Game 문자키에 가려지지 않습니다.
++키보드 전체 무선 지연이 0이라는 뜻은 아닙니다.
++
++## 설치: Windows 기존 저장소로 적용
++
++### 권장: 백업하는 복사 도구
++
++1. ZIP을 **기존 Git 저장소 밖의 새 폴더**에 풉니다.
++2. `INSTALL.cmd`를 실행합니다. Python 3가 필요합니다.
++3. 대상 경로를 확인합니다. 기본값은 `D:\Dev\projects\modu-c-zmk-obrey`입니다.
++4. 변경 목록을 검토한 뒤 `y`를 입력합니다. 덮어쓸 파일과 제거할 구버전 파일은
++   저장소 **옆의 날짜별 백업 폴더**에 저장됩니다. `.git`과 Git remote는 건드리지 않습니다.
++5. 원래 저장소에서 `git status --short`, `git diff`로 검토하고,
++   도구가 출력한 파일별 `git add` 명령 → `git commit` → `git push`를 실행합니다.
++6. GitHub Actions의 **Build MODU-C ZMK firmware** 결과를 확인합니다.
++   모두 성공한 실행의 **modu-c-firmware** 아티팩트에서 좌우 UF2를 받습니다.
++
++도구는 자동으로 커밋·푸시하지 않습니다. 이후 직접 편집한 키맵도 백업하지만,
++이 재구성본으로 교체하므로 대화 이후의 개인 수정은 비교해서 다시 반영해야 합니다.
++`STOP`이 표시되면 그대로 중단하고 출력 내용을 확인하세요.
++
++명령어로 변경 예정 목록만 보기:
++
++```powershell
++py -3 scripts\apply_to_repo.py --target "D:\Dev\projects\modu-c-zmk-obrey" --dry-run
++```
++
++백업 폴더의 `manifest.json`에는 생성·교체·제거 목록이 있고,
++`files/`에는 실제로 덮어쓰기 전의 파일이 있습니다.
++`INSTALL.cmd`는 Windows에서 직접 실행 시험하지 않았고,
++그 안에서 호출하는 Python 복사 도구는 호스트에서 시험했습니다.
++
++### 수동 적용
++
++내용물을 기존 저장소 루트에 복사하되 `.github`도 포함합니다.
++이전 실험 패치를 설치했다면 원래 생성했던 다음 파일이 남지 않아야 합니다.
++백업 도구는 알려진 생성 파일인지 확인한 후에만 제거합니다.
++
++- 루트 `zephyr/module.yml` 또는 `zephyr/module.yaml`
++- `.github/workflows/obrey-combo-boot-build.yml`
++- 루트 `dts/bindings/behaviors/zmk,behavior-obrey-combo-boot.yaml`
++- 이전 `tools/check_obrey_combo.py`, `tools/obrey_combo_patchlib.py`
++
++이번 확장의 유효 위치는 **`local-modules/obrey-combo-boot/` 안쪽**입니다.
++루트 `zephyr/module.yml`을 다시 만들면 빌드 작업 폴더가 바뀔 수 있어
++원본의 고정 모듈 경로와 충돌합니다. 검사기는 이를 감지하면 중단합니다.
++
++## 검사와 검증 한계
++
++```powershell
++py -3 scripts\validate.py
++py -3 scripts\check_combo_boot.py
++py -3 scripts\selftest.py
++py -3 -m unittest discover -s tests -p "test_*.py" -v
++```
++
++C 컴파일러가 있는 Linux/GitHub Actions에서는 다음도 실행합니다.
++
++```sh
++python3 tests/run_host_tests.py
++```
++
++자세한 실제 실행 결과는 `VALIDATION.md`와 `reports/`에 있습니다.
++소스 검사·모의 transport C 시험은 실제 Zephyr/ARM 컴파일이나 무선 연결 시험이 아닙니다.
++이 ZIP에는 `west.yml`이 참조하는 외부 ZMK/하드웨어 소스 및 ARM SDK가 없으며,
++이 작업 환경에서도 확보하지 못했습니다. 따라서 실제 빌드는 Actions에서 확인해야 합니다.
++
++Keymap Editor에서는 일반 키를 편집할 수 있도록 원본 두 JSON을 유지했습니다.
++새 `boot135`/`boot680`은 사용자 정의 동작이므로 일반 `&bootloader`로 바꾸지 마세요.
++그 에디터의 실제 열기/저장 왕복 시험은 아직 실행하지 않았습니다.
++
++## 출처와 원본 표시
++
++원본 `LICENSE`, `NOTICE.md`, `THIRD_PARTY_NOTICES.md`, `LICENSES/`를 유지합니다.
++원본의 과거 검사 보고서는 `reference/UPSTREAM_VALIDATION.md`에 별도 보관했습니다.
++기술 문서와 접근·검증 범위는 `SOURCES.md`에 있습니다.
+--- original/THIRD_PARTY_NOTICES.md
++++ rebuilt/THIRD_PARTY_NOTICES.md
+@@ -63,3 +63,11 @@
+ 
+ The GitHub Actions packaging job includes this file, the repository `LICENSE`,
+ `NOTICE.md`, and the `LICENSES/` directory alongside the generated UF2 files.
++
++## Obrey combo-source behavior
++
++The new code in `local-modules/obrey-combo-boot/` is MIT-licensed; see its LICENSE.
++It calls standard ZMK behavior-dispatch APIs; no ZMK core code or MODU board
++source is replaced. The original MODU-specific material remains subject to
++the repository's non-commercial license. The module's MIT license is also
++shipped with generated firmware as `LICENSES/OBREY-COMBO-MIT.txt`.
+--- original/VALIDATION.md
++++ rebuilt/VALIDATION.md
+@@ -1,56 +1,60 @@
+-# Validation report
++# Rebuild verification — 2026-09-13
+ 
+-Audited: 2026-09-02
++This report applies to the uploaded-original-based Obrey rebuild, not an
++uninspected live GitHub branch. The original historical report is preserved
++as `reference/UPSTREAM_VALIDATION.md`.
+ 
+-## Upstream correspondence checked
++## Actually executed in this environment
+ 
+-- `config/modu.keymap` is based on MODU-C upstream revision `bee0bb4b812f63f279eb67e928accc89600b5904` and keeps 67 behavior bindings in every customized layer.
+-- Layout metadata contains the exact 67 `(row, col)` entries from the upstream `default_transform`: rows 0–4, columns 0–11, followed by row 5 columns 0, 1, 2, 6, 7, 8, and 9.
+-- The build matrix uses the upstream board and shield names exactly: `ms88sf3/nrf52840`, `modu_left`, and `modu_right`.
+-- The additional module paths match the original build script: `modu-module` and `zmk-pmw3610-driver`.
+-- The fallback conversion uses the same nRF52840 UF2 family ID as the original build script: `0xADA52840`.
+-- The west manifest and reusable workflow use fixed ZMK and MODU-C source revisions rather than moving branch names.
++1. The uploaded original repository's unmodified `scripts/validate.py` and
++   `scripts/selftest.py`, before modification: PASS.
++2. The original unmodified metadata and keymap validation functions, applied
++   to the rebuilt repository: PASS.
++3. Rebuilt `scripts/validate.py`: PASS. Its sole logic change is adding the
++   explicit nested behavior-module path to the exact expected CMake argument.
++   All original pins, target order, placeholder rules, license checks,
++   workflow/package checks and quoted-list checks remain enforced.
++4. Rebuilt `scripts/selftest.py` (unchanged): PASS for HEX/UF2 synthetic fixtures.
++   These fixtures are NOT compiled MODU firmware.
++5. `scripts/check_combo_boot.py`: PASS. Five 67-entry layers, matching three-key
++   combo/observer positions, Base-only scope, ordinary symbol restoration,
++   nested-module wiring, and devicetree property-before-child order.
++6. 32 Python tests: PASS (22 repository checks/mutations; 10 safe-copy tests).
++7. Actual C observer/dispatcher source compiled on the host against mocked
++   ZMK/Zephyr APIs and transport: 25 scenarios PASS, repeated with behavior
++   metadata both disabled and enabled. The compiler uses -Wall -Wextra -Werror.
++8. Every ordinary layer binding compared with the agreed v3.6: all 335 unchanged.
++9. YAML syntax, Python syntax, Bash syntax for workflow shell blocks, archive
++   CRC/path/duplicate checks, and extracted-byte comparison: PASS.
+ 
+-## Automated local checks passed
++## Improvements over the earlier generic patch
+ 
+-- Strict JSON parsing, including duplicate-key detection.
+-- `config/modu.json` and `config/info.json` semantic equality.
+-- 67 unique layout coordinates in exact firmware-transform order.
+-- Six tiny visual placeholders at row 4, columns 3–8.
+-- Every keymap layer contains exactly 67 behavior references.
+-- Default-layer `&none` entries occur only at zero-based binding positions 51–56.
+-- Exact left/right matrix targets, artifact names, source revisions, module paths, and CMake-list quoting.
+-- Python syntax compilation for all validation and packaging scripts.
+-- YAML parsing for `build.yaml`, `config/west.yml`, and the GitHub Actions workflow.
+-- Shell syntax checking for every workflow shell block.
+-- ZIP path safety, duplicate-entry detection, archive CRC testing, hidden `.github` retention, and extracted-byte comparison.
++- No root `zephyr/module.yml`: avoid the reusable workflow moving the west
++  workspace while hardware CMake paths still reference GITHUB_WORKSPACE.
++- Use `local-modules/`, not west's cached `modules/` dependency directory,
++  so dependency-cache restoration cannot replace the custom source files.
++- A single explicit ZMK_EXTRA_MODULES argument contains the two original modules
++  plus `local-modules/obrey-combo-boot` for each half. No duplicate -D flag overwrite.
++- Keep one original pinned workflow, with all original UF2 conversion/validation
++  and notices. No separate moving-branch workflow bypassing packaging.
++- Properties precede child nodes in the keymap; the earlier preview's misplaced
++  combo `compatible` property is not carried forward.
++- Source observer re-arms safely after a remote boot prevented key-up packets;
++  stale replays and incomplete replacement chords still cannot reset a device.
++- Unknown/mixed/stale input or dispatch failures never silently reset the central.
++- Existing scripts are retained and extended, not disabled to get past an error.
++- Backup copier detects known incompatible legacy patch files and removes only
++  recognized generated files after backing them up. Git history/remotes unchanged.
+ 
+-## Packaging safeguards tested
++## Explicitly not executed
+ 
+-The dependency-free `scripts/selftest.py` exercises both success and failure paths:
++- Fetching the pinned ZMK/Zephyr/hardware dependency trees.
++- Actual ARM firmware compilation or linking; no UF2 build output was produced.
++- GitHub Actions, physical flashing, source-specific reset over real BLE,
++  scanning, trackballs, power states, or Keymap Editor round-trip.
++- Windows execution of INSTALL.cmd; its Python copier was tested on the host.
+ 
+-- Valid Intel HEX with CRLF, a terminal newline, and an extra blank line is validated and normalized.
+-- Corrupt Intel HEX checksums, non-hex characters, invalid control-record addresses, and data records crossing a 16-bit segment boundary are rejected.
+-- Native UF2 selection works for both halves.
+-- HEX conversion routing works with a test converter and verifies that the converter receives no terminal blank line.
+-- Missing or duplicate left/right build outputs are rejected instead of being guessed.
+-- UF2 start/end magic, block numbering, declared block count, payload size, address alignment, non-overlap, 32-bit address bounds, family flag, and family ID are checked.
+-- Wrong-family and malformed UF2 files are rejected.
+-- Byte-identical left/right outputs are rejected as a likely packaging mistake.
+-
+-## Hardening applied during this audit
+-
+-- Replaced count-only `&none` validation with exact-position validation.
+-- Replaced “find any two files” packaging with exact per-half filename selection.
+-- Added Intel HEX canonicalization before using the pinned upstream converter. This prevents a terminal blank line from reaching a converter parser that indexes every split line.
+-- Added final UF2 binary validation and a second verification step before artifact upload.
+-- Added workflow triggers for every script and license/notice file that affects the final artifact.
+-- Corrected the Microsoft UF2 license-file path in `THIRD_PARTY_NOTICES.md`.
+-
+-## Not executed in this environment
+-
+-- `west update` and the complete ZMK/Zephyr compilation.
+-- The GitHub-hosted reusable workflow itself.
+-- Flashing or functional testing on a physical MODU-C.
+-
+-The first successful GitHub Actions run is therefore still the integration-build proof. A successful build plus the automatic UF2 checks gives strong evidence that the files are correctly assembled, but only a physical flash can confirm bootloader compatibility, scanning, Bluetooth, LEDs, and both trackballs on the actual keyboard.
++The configuration ZIP is suitable for the next integration-build step, but
++is not a hardware-certified firmware release. Do not treat host mock tests as
++proof that the real remote half has received a command. Retain a known-good
++firmware and a physical reset method when first testing.
+--- original/build.yaml
++++ rebuilt/build.yaml
+@@ -2,11 +2,11 @@
+   - board: ms88sf3/nrf52840
+     shield: modu_left
+     cmake-args: >-
+-      "-DZMK_EXTRA_MODULES=${GITHUB_WORKSPACE}/modu-c-firmware/modu-module;${GITHUB_WORKSPACE}/modu-c-firmware/zmk-pmw3610-driver"
++      "-DZMK_EXTRA_MODULES=${GITHUB_WORKSPACE}/modu-c-firmware/modu-module;${GITHUB_WORKSPACE}/modu-c-firmware/zmk-pmw3610-driver;${GITHUB_WORKSPACE}/local-modules/obrey-combo-boot"
+     artifact-name: modu_left
+ 
+   - board: ms88sf3/nrf52840
+     shield: modu_right
+     cmake-args: >-
+-      "-DZMK_EXTRA_MODULES=${GITHUB_WORKSPACE}/modu-c-firmware/modu-module;${GITHUB_WORKSPACE}/modu-c-firmware/zmk-pmw3610-driver"
++      "-DZMK_EXTRA_MODULES=${GITHUB_WORKSPACE}/modu-c-firmware/modu-module;${GITHUB_WORKSPACE}/modu-c-firmware/zmk-pmw3610-driver;${GITHUB_WORKSPACE}/local-modules/obrey-combo-boot"
+     artifact-name: modu_right
+--- original/config/modu.keymap
++++ rebuilt/config/modu.keymap
+@@ -1,71 +1,214 @@
+ /*
+- * Copyright (c) 2026 EKS Inc.
+- * Created by Ryu.
++ * Obrey MODU-C rebuild 4.0 -- based on the uploaded original config ZIP.
++ * Original MODU material: Copyright (c) 2026 EKS Inc.; created by Ryu.
+  * SPDX-License-Identifier: LicenseRef-EKS-NonCommercial-1.0
++ * Unofficial non-commercial modification; preserve LICENSE and NOTICE.md.
+  *
+- * Unofficial modification, based on upstream commit
+- * bee0bb4b812f63f279eb67e928accc89600b5904 and customized through
+- * Keymap Editor for GitHub Actions builds.
++ * Base=0, Nav=1, Mouse=2, Game=3, FnMedia=4. No maintenance layer.
++ * Base: 1+3+5 -> boot the source of those keys; 6+8+0 -> their source.
++ * True three-key combos: 80 ms window, 300 ms prior input idle, no long hold.
++ * REQUIRES modules/obrey-combo-boot; this is not a standalone keymap file.
++ * All 335 ordinary bindings are retained from the agreed v3.6 keymap.
++ * Base placeholders 51..56; slot 66 is neutral, not assumed nonexistent.
++ * Board/trackball source revisions and metadata are retained from the ZIP.
++ * Firmware build and physical tests are separate from source/host tests.
+  */
+ 
++#define L_BASE  0
++#define L_NAV   1
++#define L_MOUSE 2
++#define L_GAME  3
++#define L_FN    4
++
++#define ZMK_POINTING_DEFAULT_MOVE_VAL 1200
++#define ZMK_POINTING_DEFAULT_SCRL_VAL 25
++
++#include <input/processors.dtsi>
++#include <zephyr/dt-bindings/input/input-event-codes.h>
+ #include <behaviors.dtsi>
+ #include <dt-bindings/zmk/bt.h>
+ #include <dt-bindings/zmk/keys.h>
++#include <dt-bindings/zmk/outputs.h>
+ #include <dt-bindings/zmk/pointing.h>
+ 
++/* Only keyboard-generated mouse motion/scroll. Not the physical trackball. */
++&mmv_input_listener {
++    input-processors = <&zip_xy_scaler 2 1>;
++};
++&msc_input_listener {
++    input-processors = <&zip_scroll_scaler 2 1>;
++};
++&msc {
++    acceleration-exponent = <1>;
++    time-to-max-speed-ms = <100>;
++    delay-ms = <0>;
++};
++&mmv {
++    time-to-max-speed-ms = <500>;
++    acceleration-exponent = <1>;
++    trigger-period-ms = <16>;
++};
++
+ / {
++    behaviors {
++        // Real combo-source dispatch. Standard &bootloader alone loses the side.
++        boot135: boot135 {
++            compatible = "zmk,behavior-obrey-combo-boot";
++            #binding-cells = <0>;
++            display-name = "Boot left: 1+3+5";
++            key-positions = <1 3 5>;
++            window-ms = <80>;
++            bindings = <&bootloader>;
++        };
++        boot680: boot680 {
++            compatible = "zmk,behavior-obrey-combo-boot";
++            #binding-cells = <0>;
++            display-name = "Boot right: 6+8+0";
++            key-positions = <6 8 10>;
++            window-ms = <80>;
++            bindings = <&bootloader>;
++        };
++
++        hm200: hm200 {
++            compatible = "zmk,behavior-hold-tap";
++            label = "HOMEROW_MODS";
++            bindings = <&kp>, <&kp>;
++            #binding-cells = <2>;
++            tapping-term-ms = <200>;
++            quick-tap-ms = <130>;
++            require-prior-idle-ms = <(-1)>;
++            flavor = "tap-preferred";
++        };
++
++        hm250: hm250 {
++            compatible = "zmk,behavior-hold-tap";
++            label = "HM250";
++            bindings = <&kp>, <&kp>;
++            #binding-cells = <2>;
++            tapping-term-ms = <250>;
++            quick-tap-ms = <130>;
++            require-prior-idle-ms = <(-1)>;
++            flavor = "tap-preferred";
++        };
++    };
++
+     combos {
+         compatible = "zmk,combos";
+ 
+-        reset {
+-            bindings = <&sys_reset>;
+-            key-positions = <48 5 6>;
+-            layers = <1>;
++        // Direct three-key combos. The custom behavior restores the actual side.
++        combo_boot_135 {
++            timeout-ms = <80>;
++            require-prior-idle-ms = <300>;
++            key-positions = <1 3 5>;
++            bindings = <&boot135>;
++            layers = <L_BASE>;
++        };
++        combo_boot_680 {
++            timeout-ms = <80>;
++            require-prior-idle-ms = <300>;
++            key-positions = <6 8 10>;
++            bindings = <&boot680>;
++            layers = <L_BASE>;
++        };
++
++        /* No combo is active on Game or FnMedia. */
++        mouse {
++            timeout-ms = <50>;
++            key-positions = <41 62>;
++            bindings = <&tog L_MOUSE>;
++            layers = <L_BASE L_NAV L_MOUSE>;
++        };
++        enter {
++            timeout-ms = <50>;
++            key-positions = <33 32>;
++            bindings = <&kp ENTER>;
++            layers = <L_BASE>;
++        };
++        back_space {
++            timeout-ms = <50>;
++            key-positions = <31 32>;
++            bindings = <&kp BACKSPACE>;
++            layers = <L_BASE>;
++        };
++
++        /* Intentional pairing-clear gesture: Nav held, then the 1 and 0 number keys together.
++         * Not active on Game or FnMedia. Clears only the selected Bluetooth profile.
++         */
++        bluetooth_clear {
++            timeout-ms = <50>;
++            require-prior-idle-ms = <300>;
++            key-positions = <1 10>;
++            bindings = <&bt BT_CLR>;
++            layers = <L_NAV>;
+         };
+     };
+ 
+     keymap {
+         compatible = "zmk,keymap";
+-
++        // Base letters/home-row mods kept; new keys restore missing punctuation. 0 enters Game.
+         default_layer {
+-            // -----------------------------------------------------------------
+-            // |ESC | 1  | 2  | 3  | 4  | 5  |   | 6  | 7  | 8  | 9  | 0  |DEL |
+-            // |TAB | Q  | W  | E  | R  | T  |   | Y  | U  | I  | O  | P  |HOME|
+-            // |CAPS| A  | S  | D  | F  | G  |   | H  | J  | K  | L  | ;  |PGUP|
+-            // |LSFT| Z  | X  | C  | V  | B  |   | N  | M  | ,  | .  | /  |PGDN|
+-            // |LCTL|LALT|LGUI|                                 |RALT|RCTL|END |
+-            //                |LANG|SPC |MO1 |   |BSPC|RET |MO1 | B  |
+-
+-            bindings = <
+-&kp ESC    &kp N1     &kp N2    &kp N3  &kp N4  &kp N5  &kp N6    &kp N7   &kp N8     &kp N9    &kp N0     &kp BACKSPACE
+-&kp TAB    &kp Q      &kp W     &kp E   &kp R   &kp T   &kp Y     &kp U    &kp I      &kp O     &kp P      &kp HOME
+-&kp CAPS   &kp A      &kp S     &kp D   &kp F   &kp G   &kp H     &kp J    &kp K      &kp L     &kp SEMI   &kp PG_UP
+-&kp LSHFT  &kp Z      &kp X     &kp C   &kp V   &kp B   &kp N     &kp M    &kp COMMA  &kp DOT   &kp FSLH   &kp PG_DN
+-&kp LCTRL  &kp LALT   &kp LGUI  &none   &none   &none   &none     &none    &none      &kp RALT  &kp RCTRL  &kp END
+-&kp LANG1  &kp SPACE  &mo 1                             &kp BSPC  &kp RET  &mo 1      &kp B
+-            >;
+-        };
+-
++            display-name = "Base";
++            bindings = <
++                /* 00..11 */ &to L_GAME              &kp N1                  &kp N2                  &kp N3                  &kp N4                  &kp N5                  &kp N6                  &kp N7                  &kp N8                  &kp N9                  &kp N0                  &kp MINUS
++                /* 12..23 */ &mt LG(A) LG(Z)         &kp SLASH               &kp W                   &kp E                   &kp R                   &kp T                   &kp Y                   &kp U                   &kp I                   &kp O                   &kp SEMICOLON           &kp EQUAL
++                /* 24..35 */ &mt LG(X) LG(C)         &hm250 LCTRL A          &hm200 LALT S           &hm200 LEFT_GUI D       &hm200 LSHFT F          &kp G                   &kp H                   &hm200 LSHFT J          &hm200 LEFT_GUI K       &hm200 LALT L           &hm250 LCTRL P          &kp APOS
++                /* 36..47 */ &kp LG(V)               &kp Z                   &kp X                   &kp C                   &kp V                   &kp Q                   &kp N                   &kp M                   &kp B                   &kp COMMA               &kp PERIOD              &kp BSLH
++                /* 48..59 */ &kp TAB                 &kp LBKT                &kp RBKT                &none                   &none                   &none                   &none                   &none                   &none                   &kp GRAVE               &mkp LCLK               &mkp RCLK
++                /* 60..66 */ &kp ESC                 &kp SPACE               &lt L_NAV CAPSLOCK      &kp ENTER               &kp BACKSPACE           &lt L_FN DEL            &trans
++            >;
++        };
++
++        // Nav; node name lower_layer retained for compatibility with existing repo checks.
+         lower_layer {
+-            bindings = <
+-&kp F1      &kp F2        &kp F3        &kp F4        &kp F5  &kp F6  &kp F7     &kp F8         &kp F9     &kp F10    &kp F11          &kp F12
+-&trans      &kp HOME      &kp UP        &kp END       &trans  &trans  &mkp MCLK  &kp KP_N7      &kp KP_N8  &kp KP_N9  &kp KP_PLUS      &kp BSPC
+-&trans      &kp LEFT      &kp DOWN      &kp RIGHT     &trans  &trans  &mkp RCLK  &kp KP_N4      &kp KP_N5  &kp KP_N6  &kp KP_MINUS     &kp KP_COMMA
+-&bt BT_CLR  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &trans  &trans  &mkp LCLK  &kp KP_N1      &kp KP_N2  &kp KP_N3  &kp KP_MULTIPLY  &kp KP_DOT
+-&mo 2       &trans        &trans        &trans        &trans  &trans  &trans     &trans         &trans     &kp KP_N0  &kp KP_DIVIDE    &kp KP_ENTER
+-&trans      &trans        &trans                                      &kp ENTER  &kp BACKSPACE  &trans     &trans
+-            >;
+-        };
+-
+-        layer_2 {
+-            bindings = <
+-&trans  &trans  &trans  &trans  &trans  &bootloader  &bootloader  &trans  &trans  &trans  &trans  &trans
+-&trans  &trans  &trans  &trans  &trans  &trans       &trans       &trans  &trans  &trans  &trans  &trans
+-&trans  &trans  &trans  &trans  &trans  &trans       &trans       &trans  &trans  &trans  &trans  &trans
+-&trans  &trans  &trans  &trans  &trans  &trans       &trans       &trans  &trans  &trans  &trans  &trans
+-&trans  &trans  &trans  &trans  &trans  &trans       &trans       &trans  &trans  &trans  &trans  &trans
+-&trans  &trans  &trans                               &trans       &trans  &trans  &trans
+-            >;
+-        };
++            display-name = "Nav";
++            bindings = <
++                /* 00..11 */ &to L_BASE              &trans                  &trans                  &trans                  &trans                  &trans                  &trans                  &trans                  &trans                  &trans                  &trans                  &trans
++                /* 12..23 */ &trans                  &trans                  &trans                  &trans                  &trans                  &trans                  &trans                  &trans                  &kp UP                  &trans                  &trans                  &trans
++                /* 24..35 */ &trans                  &trans                  &kp LG(LC(LS(N4)))      &kp LG(LS(N5))          &trans                  &trans                  &kp TAB                 &kp LEFT                &kp DOWN                &kp RIGHT               &kp HOME                &trans
++                /* 36..47 */ &trans                  &trans                  &trans                  &trans                  &kp LG(LC(LS(N3)))      &trans                  &kp INS                 &kp PG_UP               &kp PG_DN               &kp END                 &kp RALT                &trans
++                /* 48..59 */ &trans                  &trans                  &trans                  &none                   &none                   &none                   &none                   &none                   &none                   &trans                  &trans                  &trans
++                /* 60..66 */ &trans                  &trans                  &trans                  &trans                  &trans                  &trans                  &none
++            >;
++        };
++
++        // Mouse mode; 0 or left Escape returns to Base. 50 temporarily activates FnMedia.
++        Mouse {
++            display-name = "Mouse";
++            bindings = <
++                /* 00..11 */ &to L_BASE              &trans                  &trans                  &trans                  &trans                  &trans                  &trans                  &trans                  &trans                  &trans                  &trans                  &trans
++                /* 12..23 */ &trans                  &kp LG(MINUS)           &kp LG(EQUAL)           &none                   &kp LG(RBKT)            &kp LG(LBKT)            &kp LG(LBKT)            &kp LG(RBKT)            &mmv MOVE_UP            &kp LG(EQUAL)           &kp LG(MINUS)           &trans
++                /* 24..35 */ &trans                  &none                   &mkp MCLK               &mkp RCLK               &mkp LCLK               &none                   &kp LG(LBKT)            &mmv MOVE_LEFT          &mmv MOVE_DOWN          &mmv MOVE_RIGHT         &trans                  &trans
++                /* 36..47 */ &trans                  &msc SCRL_RIGHT         &msc SCRL_LEFT          &msc SCRL_UP            &msc SCRL_DOWN          &trans                  &kp LG(RBKT)            &msc SCRL_UP            &msc SCRL_DOWN          &msc SCRL_LEFT          &msc SCRL_RIGHT         &trans
++                /* 48..59 */ &kp TAB                 &none                   &mo L_FN                &none                   &none                   &none                   &none                   &none                   &none                   &mkp MCLK               &mkp LCLK               &mkp RCLK
++                /* 60..66 */ &to L_BASE              &trans                  &trans                  &mkp RCLK               &mkp LCLK               &mkp MCLK               &none
++            >;
++        };
++
++        // Gaming: plain key/button presses; 0 returns to Base. Dot moved from 46 to 35.
++        game {
++            display-name = "Game";
++            bindings = <
++                /* 00..11 */ &to L_BASE              &kp N1                  &kp N2                  &kp N3                  &kp N4                  &kp N5                  &kp N6                  &kp N7                  &kp N8                  &kp N9                  &kp N0                  &kp MINUS
++                /* 12..23 */ &kp TAB                 &kp SLASH               &kp W                   &kp E                   &kp R                   &kp T                   &kp Y                   &kp U                   &kp I                   &kp O                   &kp SEMICOLON           &kp EQUAL
++                /* 24..35 */ &kp LCTRL               &kp A                   &kp S                   &kp D                   &kp F                   &kp G                   &kp H                   &kp J                   &kp K                   &kp L                   &kp P                   &kp PERIOD
++                /* 36..47 */ &kp LSHFT               &kp Z                   &kp X                   &kp C                   &kp V                   &kp Q                   &kp N                   &kp M                   &kp B                   &kp COMMA               &kp UP                  &kp BSLH
++                /* 48..59 */ &kp LEFT_ALT            &mkp RCLK               &mo L_FN                &none                   &none                   &none                   &none                   &none                   &none                   &kp LEFT                &kp DOWN                &kp RIGHT
++                /* 60..66 */ &kp ESC                 &kp SPACE               &mkp LCLK               &kp ENTER               &kp BACKSPACE           &kp DELETE              &none
++            >;
++        };
++
++        // Fn overlay above Game.
++        FnMedia {
++            display-name = "FnMedia";
++            bindings = <
++                /* 00..11 */ &kp F11                    &kp F1                     &kp F2                     &kp F3                     &kp F4                     &kp F5                     &kp F6                     &kp F7                     &kp F8                     &kp F9                     &kp F10                    &kp F12
++                /* 12..23 */ &trans                     &kp GRAVE                  &kp PSCRN                  &kp SLCK          &kp C_PAUSE      &kp CAPSLOCK               &bt BT_SEL 0               &bt BT_SEL 1               &bt BT_SEL 2               &bt BT_SEL 3               &bt BT_SEL 4               &kp K_APP
++                /* 24..35 */ &trans                     &trans                     &trans                     &trans                     &trans                     &trans                     &kp C_PREV                 &kp C_PP                   &kp C_NEXT                 &kp C_VOL_DN               &kp C_VOL_UP               &kp C_MUTE
++                /* 36..47 */ &trans                     &kp LBKT                   &kp RBKT                   &mkp MCLK                  &msc SCRL_UP               &msc SCRL_DOWN             &out OUT_USB               &out OUT_BLE               &out OUT_TOG               &kp APOS                   &trans                     &to L_MOUSE
++                /* 48..59 */ &trans                     &trans                     &trans                     &none                      &none                      &none                      &none                      &none                      &none                      &trans                     &trans                     &trans
++                /* 60..66 */ &trans                     &trans                     &trans                     &trans                     &trans                     &trans                     &none
++            >;
++        };
++
+     };
+ };
+--- original/docs/layout-preview.svg
++++ rebuilt/docs/layout-preview.svg
+@@ -1,7 +1,7 @@
+ <svg xmlns="http://www.w3.org/2000/svg" width="918" height="419" viewBox="0 0 918 419">
+ <rect width="100%" height="100%" fill="white"/>
+ <style>text{font-family:Arial,sans-serif;fill:#111}.key{fill:#f7f7f7;stroke:#222;stroke-width:1.2}.none{fill:#ddd;stroke:#777;stroke-width:0.8}.title{font-weight:700;font-size:18px}.note{font-size:12px;fill:#555}.label{font-size:11px;text-anchor:middle;dominant-baseline:middle}</style>
+-<text x="24" y="18" class="title">MODU-C default layer — Keymap Editor layout</text>
++<text x="24" y="18" class="title">Original example — NOT the Obrey keymap</text>
+ <rect class="key" x="24.0" y="40.0" width="55.0" height="55.0" rx="5"/>
+ <text class="label" x="51.5" y="67.5">ESC</text>
+ <rect class="key" x="82.0" y="40.0" width="55.0" height="55.0" rx="5"/>
+--- original/scripts/validate.py
++++ rebuilt/scripts/validate.py
+@@ -240,7 +240,8 @@
+ 
+     expected_cmake = (
+         "-DZMK_EXTRA_MODULES=${GITHUB_WORKSPACE}/modu-c-firmware/modu-module;"
+-        "${GITHUB_WORKSPACE}/modu-c-firmware/zmk-pmw3610-driver"
++        "${GITHUB_WORKSPACE}/modu-c-firmware/zmk-pmw3610-driver;"
++        "${GITHUB_WORKSPACE}/local-modules/obrey-combo-boot"
+     )
+     for entry in entries:
+         try:

@@ -1,17 +1,23 @@
 /*
- * Obrey MODU-C rebuild 4.0 -- based on the uploaded original config ZIP.
- * Original MODU material: Copyright (c) 2026 EKS Inc.; created by Ryu.
- * SPDX-License-Identifier: LicenseRef-EKS-NonCommercial-1.0
- * Unofficial non-commercial modification; preserve LICENSE and NOTICE.md.
+ * Obrey MODU-C v3.6 - DIRECT three-key bootloader combos (stock ZMK).
+ * Target: Obrey/modu-c-zmk-obrey/config/modu.keymap
+ * Based on the attached v3.5 keymap, NOT a live GitHub checkout.
  *
- * Base=0, Nav=1, Mouse=2, Game=3, FnMedia=4. No maintenance layer.
- * Base: 1+3+5 -> boot the source of those keys; 6+8+0 -> their source.
- * True three-key combos: 80 ms window, 300 ms prior input idle, no long hold.
- * REQUIRES modules/obrey-combo-boot; this is not a standalone keymap file.
- * All 335 ordinary bindings are retained from the agreed v3.6 keymap.
- * Base placeholders 51..56; slot 66 is neutral, not assumed nonexistent.
- * Board/trackball source revisions and metadata are retained from the ZIP.
- * Firmware build and physical tests are separate from source/host tests.
+ * Base only: press 1+3+5 together OR 6+8+0 together (80 ms window).
+ * No extra key, layer entry or long hold. Existing 300 ms prior-idle guard kept.
+ * The Maintenance layer and its two-key entry combos have been removed.
+ * All five ordinary layers and four existing unrelated combos are unchanged.
+ *
+ * IMPORTANT: BOTH COMBOS RESET THE CENTRAL HALF, NOT ONE HALF EACH.
+ * Stock ZMK invokes source-specific reset behaviors from combos on the central.
+ * The number keys' physical sides DO NOT select the bootloader target.
+ * This file does NOT implement peripheral/right-half targeting.
+ * Reference: https://zmk.dev/docs/keymaps/behaviors/reset#split-keyboards
+ *
+ * Base &none indices: 51..56 only; Base index 66 stays &trans.
+ * Original left shortcut column, thumbs, brackets, backtick and Game retained.
+ * No GPIO, Bluetooth-role, physical trackball or firmware-module changes.
+ * Tested structurally only. Full repo validator, build and hardware untested.
  */
 
 #define L_BASE  0
@@ -51,24 +57,6 @@
 
 / {
     behaviors {
-        // Real combo-source dispatch. Standard &bootloader alone loses the side.
-        boot135: boot135 {
-            compatible = "zmk,behavior-obrey-combo-boot";
-            #binding-cells = <0>;
-            display-name = "Boot left: 1+3+5";
-            key-positions = <1 3 5>;
-            window-ms = <80>;
-            bindings = <&bootloader>;
-        };
-        boot680: boot680 {
-            compatible = "zmk,behavior-obrey-combo-boot";
-            #binding-cells = <0>;
-            display-name = "Boot right: 6+8+0";
-            key-positions = <6 8 10>;
-            window-ms = <80>;
-            bindings = <&bootloader>;
-        };
-
         hm200: hm200 {
             compatible = "zmk,behavior-hold-tap";
             label = "HOMEROW_MODS";
@@ -95,19 +83,19 @@
     combos {
         compatible = "zmk,combos";
 
-        // Direct three-key combos. The custom behavior restores the actual side.
+        // Direct combos. Both target CENTRAL under standard ZMK reset semantics.
         combo_boot_135 {
             timeout-ms = <80>;
             require-prior-idle-ms = <300>;
             key-positions = <1 3 5>;
-            bindings = <&boot135>;
+            bindings = <&bootloader>;
             layers = <L_BASE>;
         };
         combo_boot_680 {
             timeout-ms = <80>;
             require-prior-idle-ms = <300>;
             key-positions = <6 8 10>;
-            bindings = <&boot680>;
+            bindings = <&bootloader>;
             layers = <L_BASE>;
         };
 
