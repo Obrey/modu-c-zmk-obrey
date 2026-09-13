@@ -193,6 +193,23 @@ def check_keymap() -> None:
             f"{PLACEHOLDER_INDICES}; found {none_indices}"
         )
 
+    expected_entry_counts = {
+        "&lt L_FN ESC": 2,
+        "&mo L_FN": 1,
+        "&lt L_NUM BACKSPACE": 1,
+        "&lt L_SYM ENTER": 1,
+        "&to L_MOUSE": 1,
+    }
+    for binding, expected_count in expected_entry_counts.items():
+        actual_count = text.count(binding)
+        if actual_count != expected_count:
+            fail(
+                f"layer entry {binding!r} must occur {expected_count} time(s); "
+                f"found {actual_count}"
+            )
+    if "&lt L_FN DEL" in text or "&lt L_NUM SPACE" in text:
+        fail("Fn/Numpad layer entry remains on an obsolete thumb position")
+
 
 def _parse_build_entries(text: str) -> list[dict[str, str]]:
     pattern = re.compile(

@@ -10,7 +10,7 @@
  * Base typing combos: D+F -> Space, S+D -> Caps Lock.
  * Base left macro column: Tab -> Undo/Select -> Cut/Copy -> Paste.
  * Hold right Backspace for Numpad; hold right Enter for SymbolPad.
- * Tap behavior remains Backspace/Enter; left Space remains a plain key.
+ * Hold the far-left thumb Escape for Fn; tap behavior remains Escape.
  * REQUIRES modules/obrey-combo-boot; this is not a standalone keymap file.
  * No RGB underglow bindings or RGB include are used.
  * Base placeholders 51..56; slot 66 is neutral, not assumed nonexistent.
@@ -178,7 +178,7 @@
 &mt LG(A) LG(Z)  &hm250 LCTRL A  &hm200 LALT S       &hm200 LEFT_GUI D  &hm200 LSHFT F  &kp G   &kp H      &hm200 LSHFT J  &hm200 LEFT_GUI K  &hm200 LALT L  &hm250 LCTRL P  &kp APOS
 &mt LG(X) LG(C)  &kp Z           &kp X               &kp C              &kp V           &kp Q   &kp N      &kp M           &kp B              &kp COMMA      &kp PERIOD      &kp BSLH
 &kp LG(V)        &kp LBKT        &kp RBKT            &none              &none           &none   &none      &none           &none              &kp GRAVE      &mkp LCLK       &mkp RCLK
-&kp ESC          &kp SPACE       &lt L_NAV CAPSLOCK                                             &lt L_SYM ENTER  &lt L_NUM BACKSPACE  &lt L_FN DEL       &trans
+&lt L_FN ESC      &kp SPACE       &lt L_NAV CAPSLOCK                                             &lt L_SYM ENTER  &lt L_NUM BACKSPACE  &kp DEL            &trans
             >;
         };
 
@@ -196,7 +196,7 @@
             >;
         };
 
-        // Mouse mode; 0 or left Escape returns to Base. 50 temporarily activates FnMedia.
+        // Mouse mode; 0 returns to Base. The far-left thumb temporarily activates FnMedia.
 
         Mouse {
             display-name = "Mouse";
@@ -205,8 +205,8 @@
 &trans      &kp LG(MINUS)    &kp LG(EQUAL)   &none         &kp LG(RBKT)    &kp LG(LBKT)  &kp LG(LBKT)  &kp LG(RBKT)    &mmv MOVE_UP    &kp LG(EQUAL)    &kp LG(MINUS)    &trans
 &trans      &none            &mkp MCLK       &mkp RCLK     &mkp LCLK       &none         &kp LG(LBKT)  &mmv MOVE_LEFT  &mmv MOVE_DOWN  &mmv MOVE_RIGHT  &trans           &trans
 &trans      &msc SCRL_RIGHT  &msc SCRL_LEFT  &msc SCRL_UP  &msc SCRL_DOWN  &trans        &kp LG(RBKT)  &msc SCRL_UP    &msc SCRL_DOWN  &msc SCRL_LEFT   &msc SCRL_RIGHT  &trans
-&kp TAB     &none            &mo L_FN        &none         &none           &none         &none         &none           &none           &mkp MCLK        &mkp LCLK        &mkp RCLK
-&to L_BASE  &trans           &trans                                                      &mkp RCLK     &mkp LCLK       &mkp MCLK       &none
+&kp TAB     &none            &trans          &none         &none           &none         &none         &none           &none           &mkp MCLK        &mkp LCLK        &mkp RCLK
+&mo L_FN    &trans           &trans                                                      &mkp RCLK     &mkp LCLK       &mkp MCLK       &none
             >;
         };
 
@@ -219,8 +219,8 @@
 &kp TAB       &kp SLASH  &kp W      &kp E   &kp R   &kp T   &kp Y      &kp U          &kp I       &kp O      &kp SEMICOLON  &kp EQUAL
 &kp LCTRL     &kp A      &kp S      &kp D   &kp F   &kp G   &kp H      &kp J          &kp K       &kp L      &kp P          &kp PERIOD
 &kp LSHFT     &kp Z      &kp X      &kp C   &kp V   &kp Q   &kp N      &kp M          &kp B       &kp COMMA  &kp UP         &kp BSLH
-&kp LEFT_ALT  &mkp RCLK  &mo L_FN   &none   &none   &none   &none      &none          &none       &kp LEFT   &kp DOWN       &kp RIGHT
-&kp ESC       &kp SPACE  &mkp LCLK                          &kp ENTER  &kp BACKSPACE  &kp DELETE  &none
+&kp LEFT_ALT  &mkp RCLK  &trans     &none   &none   &none   &none      &none          &none       &kp LEFT   &kp DOWN       &kp RIGHT
+&lt L_FN ESC  &kp SPACE  &mkp LCLK                          &kp ENTER  &kp BACKSPACE  &kp DELETE  &none
             >;
         };
 
