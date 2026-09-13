@@ -4,18 +4,17 @@
  * SPDX-License-Identifier: LicenseRef-EKS-NonCommercial-1.0
  * Unofficial non-commercial modification; preserve LICENSE and NOTICE.md.
  *
- * Base=0, Nav=1, Mouse=2, Game=3, FnMedia=4. No maintenance layer.
+ * Base=0, Nav=1, Mouse=2, Game=3, FnMedia=4, Numpad=5, SymbolPad=6.
  * Base: 1+3+5 -> boot the source of those keys; 6+8+0 -> their source.
  * True three-key combos: 80 ms window, 300 ms prior input idle, no long hold.
+ * Base typing combos: D+F -> Space, S+D -> Caps Lock.
+ * Base left macro column: Tab -> Undo/Select -> Cut/Copy -> Paste.
+ * Hold Space for Numpad; hold Enter for SymbolPad. Tap behavior remains Space/Enter.
  * REQUIRES modules/obrey-combo-boot; this is not a standalone keymap file.
- * All 335 ordinary bindings are retained from the agreed v3.6 keymap.
+ * No RGB underglow bindings or RGB include are used.
  * Base placeholders 51..56; slot 66 is neutral, not assumed nonexistent.
  * Board/trackball source revisions and metadata are retained from the ZIP.
  * Firmware build and physical tests are separate from source/host tests.
- *
- * 4.1: Base col-1 reordered -- Tab now sits above the cut/copy/paste block
- * (which shifted down one row). Added df->Space and sd->Capslock combos
- * (home-row, two-key, Base only -- same pattern as enter/back_space).
  */
 
 #define L_BASE  0
@@ -23,6 +22,8 @@
 #define L_MOUSE 2
 #define L_GAME  3
 #define L_FN    4
+#define L_NUM   5
+#define L_SYM   6
 #define ZMK_POINTING_DEFAULT_MOVE_VAL 1200
 #define ZMK_POINTING_DEFAULT_SCRL_VAL 25
 
@@ -120,7 +121,7 @@
             layers = <L_BASE>;
         };
 
-        /* No combo is active on Game or FnMedia. */
+        /* Typing combos are active only on Base. */
 
         enter {
             timeout-ms = <50>;
@@ -136,16 +137,14 @@
             layers = <L_BASE>;
         };
 
-        // Left-hand home-row combos, same pattern as enter/back_space above.
-
-        df_space {
+        space_df {
             timeout-ms = <50>;
             key-positions = <27 28>;
             bindings = <&kp SPACE>;
             layers = <L_BASE>;
         };
 
-        sd_capslock {
+        caps_sd {
             timeout-ms = <50>;
             key-positions = <26 27>;
             bindings = <&kp CAPSLOCK>;
@@ -153,7 +152,7 @@
         };
 
         /* Intentional pairing-clear gesture: Nav held, then the 1 and 0 number keys together.
-         * Not active on Game or FnMedia. Clears only the selected Bluetooth profile.
+         * Clears only the selected Bluetooth profile.
          */
 
         bluetooth_clear {
@@ -168,17 +167,17 @@
     keymap {
         compatible = "zmk,keymap";
 
-        // Base letters/home-row mods kept; new keys restore missing punctuation. 0 enters Game.
+        // Base: left macro column moved down so Tab sits at the top.
 
         default_layer {
             display-name = "Base";
             bindings = <
 &to L_GAME       &kp N1          &kp N2              &kp N3             &kp N4          &kp N5  &kp N6     &kp N7          &kp N8             &kp N9         &kp N0          &kp MINUS
-&kp TAB          &kp SLASH       &kp W               &kp E              &kp R           &kp T   &kp Y      &kp U           &kp I              &kp O          &kp SEMICOLON   &kp EQUAL
+&kp TAB           &kp SLASH       &kp W               &kp E              &kp R           &kp T   &kp Y      &kp U           &kp I              &kp O          &kp SEMICOLON   &kp EQUAL
 &mt LG(A) LG(Z)  &hm250 LCTRL A  &hm200 LALT S       &hm200 LEFT_GUI D  &hm200 LSHFT F  &kp G   &kp H      &hm200 LSHFT J  &hm200 LEFT_GUI K  &hm200 LALT L  &hm250 LCTRL P  &kp APOS
 &mt LG(X) LG(C)  &kp Z           &kp X               &kp C              &kp V           &kp Q   &kp N      &kp M           &kp B              &kp COMMA      &kp PERIOD      &kp BSLH
 &kp LG(V)        &kp LBKT        &kp RBKT            &none              &none           &none   &none      &none           &none              &kp GRAVE      &mkp LCLK       &mkp RCLK
-&kp ESC          &kp SPACE       &lt L_NAV CAPSLOCK                                             &kp ENTER  &kp BACKSPACE   &lt L_FN DEL       &trans
+&kp ESC          &lt L_NUM SPACE &lt L_NAV CAPSLOCK                                             &lt L_SYM ENTER  &kp BACKSPACE   &lt L_FN DEL       &trans
             >;
         };
 
@@ -224,7 +223,7 @@
             >;
         };
 
-        // Fn overlay above Game.
+        // Fn + media layer retained. Playback/volume live on the right-center row.
 
         FnMedia {
             display-name = "FnMedia";
@@ -235,6 +234,35 @@
 &trans   &kp LBKT   &kp RBKT   &mkp MCLK  &msc SCRL_UP  &msc SCRL_DOWN  &out OUT_USB  &out OUT_BLE  &out OUT_TOG  &kp APOS      &trans        &to L_MOUSE
 &trans   &trans     &trans     &none      &none         &none           &none         &none         &none         &trans        &trans        &trans
 &trans   &trans     &trans                                              &trans        &trans        &trans        &none
+            >;
+        };
+
+        // Numpad: hold Space. Right hand is a calculator-style 4x4 pad.
+        // Uses regular number-row HID codes, so it does not depend on Num Lock state.
+
+        Numpad {
+            display-name = "Numpad";
+            bindings = <
+&trans  &trans  &trans  &trans  &trans  &trans  &kp EQUAL  &kp BSPC  &kp N7  &kp N8      &kp N9     &kp FSLH
+&trans  &trans  &trans  &trans  &trans  &trans  &kp DEL    &kp TAB   &kp N4  &kp N5      &kp N6     &kp ASTRK
+&trans  &trans  &trans  &trans  &trans  &trans  &kp LPAR   &kp RPAR  &kp N1  &kp N2      &kp N3     &kp MINUS
+&trans  &trans  &trans  &trans  &trans  &trans  &kp COMMA  &kp DOT   &kp N0  &kp PERIOD  &kp ENTER  &kp PLUS
+&trans  &trans  &trans  &none   &none   &none   &none      &none     &none   &trans      &trans     &trans
+&trans  &trans  &trans                                  &trans  &trans  &trans  &none
+            >;
+        };
+
+        // SymbolPad: hold Enter. Common symbols are concentrated on the left hand.
+
+        SymbolPad {
+            display-name = "SymbolPad";
+            bindings = <
+&kp EXCL   &kp AT      &kp HASH  &kp DLLR   &kp PRCNT  &kp CARET  &trans  &trans  &trans  &trans  &trans  &trans
+&kp AMPS   &kp ASTRK   &kp LPAR  &kp RPAR   &kp MINUS  &kp EQUAL  &trans  &trans  &trans  &trans  &trans  &trans
+&kp LBKT   &kp RBKT    &kp LBRC  &kp RBRC   &kp BSLH   &kp PIPE   &trans  &trans  &trans  &trans  &trans  &trans
+&kp UNDER  &kp PLUS    &kp SEMI  &kp COLON  &kp SQT    &kp DQT    &trans  &trans  &trans  &trans  &trans  &trans
+&kp GRAVE  &kp TILDE   &kp FSLH  &kp QMARK  &kp LT     &kp GT     &none   &none   &none   &trans  &trans  &trans
+&trans     &trans       &trans                                    &trans  &trans  &trans  &none
             >;
         };
     };
