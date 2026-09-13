@@ -9,7 +9,8 @@
  * True three-key combos: 80 ms window, 300 ms prior input idle, no long hold.
  * Base typing combos: D+F -> Space, S+D -> Caps Lock.
  * Base left macro column: Tab -> Undo/Select -> Cut/Copy -> Paste.
- * Hold Space for Numpad; hold Enter for SymbolPad. Tap behavior remains Space/Enter.
+ * Hold right Backspace for Numpad; hold right Enter for SymbolPad.
+ * Tap behavior remains Backspace/Enter; left Space remains a plain key.
  * REQUIRES modules/obrey-combo-boot; this is not a standalone keymap file.
  * No RGB underglow bindings or RGB include are used.
  * Base placeholders 51..56; slot 66 is neutral, not assumed nonexistent.
@@ -177,7 +178,7 @@
 &mt LG(A) LG(Z)  &hm250 LCTRL A  &hm200 LALT S       &hm200 LEFT_GUI D  &hm200 LSHFT F  &kp G   &kp H      &hm200 LSHFT J  &hm200 LEFT_GUI K  &hm200 LALT L  &hm250 LCTRL P  &kp APOS
 &mt LG(X) LG(C)  &kp Z           &kp X               &kp C              &kp V           &kp Q   &kp N      &kp M           &kp B              &kp COMMA      &kp PERIOD      &kp BSLH
 &kp LG(V)        &kp LBKT        &kp RBKT            &none              &none           &none   &none      &none           &none              &kp GRAVE      &mkp LCLK       &mkp RCLK
-&kp ESC          &lt L_NUM SPACE &lt L_NAV CAPSLOCK                                             &lt L_SYM ENTER  &kp BACKSPACE   &lt L_FN DEL       &trans
+&kp ESC          &kp SPACE       &lt L_NAV CAPSLOCK                                             &lt L_SYM ENTER  &lt L_NUM BACKSPACE  &lt L_FN DEL       &trans
             >;
         };
 
@@ -237,7 +238,7 @@
             >;
         };
 
-        // Numpad: hold Space. Left hand is a calculator-style 4x4 pad.
+        // Numpad: hold right Backspace. Left hand is a calculator-style 4x4 pad.
         // Uses regular number-row HID codes, so it does not depend on Num Lock state.
 
         Numpad {
