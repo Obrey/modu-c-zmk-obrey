@@ -70,3 +70,6 @@ The code in `local-modules/obrey-combo-boot/` is MIT-licensed; see its LICENSE.
 It calls standard ZMK behavior-dispatch APIs and does not replace ZMK core or
 MODU board source. A copy of the license is shipped as
 `LICENSES/OBREY-COMBO-MIT.txt`.
+
+The generated `settings_reset.uf2` uses ZMK's standard settings-reset shield
+from the pinned ZMK revision and is covered by the included ZMK MIT license.

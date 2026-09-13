@@ -98,7 +98,8 @@ args = parser.parse_args()
 source = Path(args.input).read_bytes()
 if source.endswith((b'\\n', b'\\r')):
     raise SystemExit('input still has a terminal newline')
-seed = 17 if 'left' in Path(args.output).name else 91
+name = Path(args.output).stem
+seed = {'modu_left': 17, 'modu_right': 91, 'settings_reset': 143}[name]
 family = int(args.family, 0)
 blocks = []
 for number in range(2):
@@ -211,21 +212,25 @@ def test_packaging(root: Path) -> None:
     native_inputs = root / "native-inputs"
     write_uf2(native_inputs / "a/modu_left.uf2", 13)
     write_uf2(native_inputs / "b/modu_right.uf2", 71)
+    write_uf2(native_inputs / "c/settings_reset.uf2", 109)
     native_output = root / "native-output"
     package_firmware(native_inputs, root / "unused-converter.py", native_output)
     validate_uf2(native_output / "modu_left.uf2")
     validate_uf2(native_output / "modu_right.uf2")
+    validate_uf2(native_output / "settings_reset.uf2")
 
     hex_inputs = root / "hex-inputs"
     hex_inputs.mkdir()
     write_hex(hex_inputs / "modu_left.hex", 19)
     write_hex(hex_inputs / "modu_right.hex", 83)
+    write_hex(hex_inputs / "settings_reset.hex", 127)
     fake_converter = root / "fake-tools/uf2conv.py"
     write_fake_converter(fake_converter)
     hex_output = root / "hex-output"
     package_firmware(hex_inputs, fake_converter, hex_output)
     validate_uf2(hex_output / "modu_left.uf2")
     validate_uf2(hex_output / "modu_right.uf2")
+    validate_uf2(hex_output / "settings_reset.uf2")
 
     missing = root / "missing"
     write_uf2(missing / "modu_left.uf2", 5)
@@ -241,6 +246,7 @@ def test_packaging(root: Path) -> None:
     write_hex(ambiguous / "one/modu_left.hex", 1)
     write_hex(ambiguous / "two/modu_left.hex", 2)
     write_hex(ambiguous / "modu_right.hex", 3)
+    write_hex(ambiguous / "settings_reset.hex", 4)
     expect_error(
         PackageError,
         package_firmware,
@@ -252,6 +258,7 @@ def test_packaging(root: Path) -> None:
     identical = root / "identical"
     write_uf2(identical / "modu_left.uf2", 29)
     shutil.copy2(identical / "modu_left.uf2", identical / "modu_right.uf2")
+    write_uf2(identical / "settings_reset.uf2", 113)
     expect_error(
         PackageError,
         package_firmware,

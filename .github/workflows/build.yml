@@ -50,7 +50,7 @@ jobs:
         run: python3 scripts/selftest.py
 
   build:
-    name: Build both halves
+    name: Build both halves and settings reset
     needs: validate
     uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@641514a97db345f499dd50b0360e594270f008fe
     with:
@@ -73,7 +73,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Download both build outputs
+      - name: Download all build outputs
         uses: actions/download-artifact@v7
         with:
           name: modu-c-intermediate
@@ -89,7 +89,7 @@ jobs:
           sparse-checkout: |
             tools/uf2
 
-      - name: Select, convert, and validate both firmware files
+      - name: Select, convert, and validate firmware files
         run: >-
           python3 scripts/package_firmware.py
           --intermediate intermediate
@@ -98,7 +98,11 @@ jobs:
           --family 0xADA52840
 
       - name: Verify final UF2 files again
-        run: python3 scripts/verify_uf2.py uf2/modu_left.uf2 uf2/modu_right.uf2
+        run: >-
+          python3 scripts/verify_uf2.py
+          uf2/modu_left.uf2
+          uf2/modu_right.uf2
+          uf2/settings_reset.uf2
 
       - name: Include license and attribution files
         shell: bash

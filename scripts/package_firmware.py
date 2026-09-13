@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Select, convert, and verify the two MODU-C firmware build outputs."""
+"""Select, convert, and verify the MODU-C firmware and settings-reset outputs."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from pathlib import Path
 from normalize_hex import HexFormatError, normalize
 from verify_uf2 import MODU_C_FAMILY_ID, Uf2ValidationError, validate_uf2
 
-TARGETS = ("modu_left", "modu_right")
+TARGETS = ("modu_left", "modu_right", "settings_reset")
 
 
 class PackageError(RuntimeError):
@@ -115,7 +115,7 @@ def package_firmware(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Package the exact MODU-C left/right build outputs as verified UF2 files."
+        description="Package the exact MODU-C left/right/reset outputs as verified UF2 files."
     )
     parser.add_argument("--intermediate", required=True, type=Path)
     parser.add_argument("--converter", required=True, type=Path)

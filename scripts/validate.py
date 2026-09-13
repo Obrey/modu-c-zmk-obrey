@@ -232,23 +232,32 @@ def check_build_files() -> None:
     expected_targets = [
         (BOARD, "modu_left", "modu_left"),
         (BOARD, "modu_right", "modu_right"),
+        (BOARD, "settings_reset", "settings_reset"),
     ]
     actual_targets = [
         (entry["board"], entry["shield"], entry["artifact"]) for entry in entries
     ]
     if actual_targets != expected_targets:
-        fail(f"build.yaml targets differ from expected left/right targets: {actual_targets}")
+        fail(f"build.yaml targets differ from expected firmware/reset targets: {actual_targets}")
 
-    expected_cmake = (
+    expected_firmware_cmake = (
         "-DZMK_EXTRA_MODULES=${GITHUB_WORKSPACE}/modu-c-firmware/modu-module;"
         "${GITHUB_WORKSPACE}/modu-c-firmware/zmk-pmw3610-driver;"
         "${GITHUB_WORKSPACE}/local-modules/obrey-combo-boot"
+    )
+    expected_reset_cmake = (
+        "-DZMK_EXTRA_MODULES=${GITHUB_WORKSPACE}/modu-c-firmware/modu-module"
     )
     for entry in entries:
         try:
             parsed = shlex.split(entry["cmake"])
         except ValueError as exc:
             fail(f"invalid cmake-args quoting for {entry['shield']}: {exc}")
+        expected_cmake = (
+            expected_reset_cmake
+            if entry["shield"] == "settings_reset"
+            else expected_firmware_cmake
+        )
         if parsed != [expected_cmake]:
             fail(
                 f"cmake-args for {entry['shield']} must be one quoted CMake-list argument"
@@ -308,8 +317,11 @@ def check_build_files() -> None:
         "fallback_binary: hex",
         "archive_name: modu-c-intermediate",
         "python3 scripts/package_firmware.py",
+        "python3 scripts/verify_uf2.py",
         "--family 0xADA52840",
-        "python3 scripts/verify_uf2.py uf2/modu_left.uf2 uf2/modu_right.uf2",
+        "uf2/modu_left.uf2",
+        "uf2/modu_right.uf2",
+        "uf2/settings_reset.uf2",
         "cp LICENSE NOTICE.md THIRD_PARTY_NOTICES.md uf2/",
         "cp -R LICENSES uf2/LICENSES",
         "name: modu-c-firmware",
@@ -364,7 +376,7 @@ def main() -> None:
     check_build_files()
     print("OK: metadata matches the 67-position upstream default_transform.")
     print("OK: every keymap layer has 67 bindings; default placeholders are at 51..56 only.")
-    print("OK: left/right targets, pinned revisions, and combo-boot module wiring are exact.")
+    print("OK: left/right/reset targets, pinned revisions, and module wiring are exact.")
     print("OK: deterministic HEX normalization, UF2 structural checks, and notices are wired in.")
 
 
