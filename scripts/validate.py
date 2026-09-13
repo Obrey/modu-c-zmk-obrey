@@ -31,6 +31,7 @@ REQUIRED_LICENSE_FILES = (
     "LICENSES/MIT.txt",
     "LICENSES/MICROSOFT-UF2-MIT.txt",
     "LICENSES/ZMK-MIT.txt",
+    "LICENSES/OBREY-COMBO-MIT.txt",
 )
 
 
@@ -240,7 +241,8 @@ def check_build_files() -> None:
 
     expected_cmake = (
         "-DZMK_EXTRA_MODULES=${GITHUB_WORKSPACE}/modu-c-firmware/modu-module;"
-        "${GITHUB_WORKSPACE}/modu-c-firmware/zmk-pmw3610-driver"
+        "${GITHUB_WORKSPACE}/modu-c-firmware/zmk-pmw3610-driver;"
+        "${GITHUB_WORKSPACE}/local-modules/obrey-combo-boot"
     )
     for entry in entries:
         try:
@@ -251,6 +253,33 @@ def check_build_files() -> None:
             fail(
                 f"cmake-args for {entry['shield']} must be one quoted CMake-list argument"
             )
+
+    module_root = ROOT / "local-modules/obrey-combo-boot"
+    required_module_files = (
+        "CMakeLists.txt",
+        "Kconfig",
+        "LICENSE",
+        "zephyr/module.yml",
+        "dts/bindings/behaviors/zmk,behavior-obrey-combo-boot.yaml",
+        "src/behavior_combo_boot.c",
+        "src/obrey_guard.h",
+    )
+    for relative in required_module_files:
+        path = module_root / relative
+        if not path.is_file() or path.stat().st_size == 0:
+            fail(f"combo-boot module file is missing/empty: {path.relative_to(ROOT)}")
+
+    module_yml = (module_root / "zephyr/module.yml").read_text(encoding="utf-8")
+    binding_yml = (
+        module_root / "dts/bindings/behaviors/zmk,behavior-obrey-combo-boot.yaml"
+    ).read_text(encoding="utf-8")
+    driver_source = (module_root / "src/behavior_combo_boot.c").read_text(encoding="utf-8")
+    if "dts_root: ." not in module_yml:
+        fail("combo-boot Zephyr module does not expose its devicetree bindings")
+    if 'compatible: "zmk,behavior-obrey-combo-boot"' not in binding_yml:
+        fail("combo-boot devicetree binding has the wrong compatible")
+    if "#define DT_DRV_COMPAT zmk_behavior_obrey_combo_boot" not in driver_source:
+        fail("combo-boot driver has the wrong DT_DRV_COMPAT")
 
     west_text = (ROOT / "config/west.yml").read_text(encoding="utf-8")
     zmk = _manifest_project(west_text, "zmk")
@@ -300,6 +329,7 @@ def check_build_files() -> None:
     for trigger_path in (
         '      - "config/**"',
         '      - "scripts/**"',
+        '      - "local-modules/obrey-combo-boot/**"',
         '      - "build.yaml"',
         '      - ".github/workflows/build.yml"',
         '      - "LICENSE"',
@@ -334,7 +364,7 @@ def main() -> None:
     check_build_files()
     print("OK: metadata matches the 67-position upstream default_transform.")
     print("OK: every keymap layer has 67 bindings; default placeholders are at 51..56 only.")
-    print("OK: left/right build targets, pinned source revisions, and module paths are exact.")
+    print("OK: left/right targets, pinned revisions, and combo-boot module wiring are exact.")
     print("OK: deterministic HEX normalization, UF2 structural checks, and notices are wired in.")
 
 

@@ -22,3 +22,11 @@ It is **not** an official EKS Inc. or MODU release.
 - Added static consistency checks, license/notice packaging, and Korean setup documentation.
 
 No trademark rights, patent rights, warranty, or endorsement are provided.
+
+## Obrey rebuild (2026-09-13)
+
+The keymap uses a nested MIT-licensed combo-source observer so each boot combo
+resets the half on which its keys were pressed. The physical firmware module
+pins, board names, driver paths, and metadata remain unchanged. This is not an
+official EKS/MODU release; retain a known-good firmware and physical reset
+method while testing on hardware.

@@ -5,6 +5,7 @@ name: Build MODU-C ZMK firmware
     paths:
       - "config/**"
       - "scripts/**"
+      - "local-modules/obrey-combo-boot/**"
       - "build.yaml"
       - ".github/workflows/build.yml"
       - "LICENSE"
@@ -15,6 +16,7 @@ name: Build MODU-C ZMK firmware
     paths:
       - "config/**"
       - "scripts/**"
+      - "local-modules/obrey-combo-boot/**"
       - "build.yaml"
       - ".github/workflows/build.yml"
       - "LICENSE"
