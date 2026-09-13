@@ -1,0 +1,89 @@
+{
+  "scope": "Checker-only fix; no keymap/firmware/build/module files modified",
+  "baseline": "Uploaded modu-c-obrey-rebuilt-from-original.zip",
+  "live_github_fetch": false,
+  "original_failure_reproduced": "Renaming mouse to mouse_toggle or deleting it causes the old checker to report Missing node: mouse",
+  "modified_repository_files": [
+    "scripts/check_combo_boot.py",
+    "tests/test_repository.py"
+  ],
+  "python_tests_passed": 48,
+  "host_c_mock_scenarios_passed": "25 x 2 metadata configurations (mocked ZMK/Zephyr/transport)",
+  "packaging_selftest": "PASS (synthetic inputs, not actual firmware)",
+  "cases": [
+    {
+      "variant": "original_archive",
+      "steps": [
+        {
+          "command": "python3 scripts/validate.py",
+          "exit_code": 0
+        },
+        {
+          "command": "python3 scripts/check_combo_boot.py",
+          "exit_code": 0
+        },
+        {
+          "command": "python3 -m unittest discover -s tests -p test_*.py",
+          "exit_code": 0
+        }
+      ],
+      "keymap_unchanged_by_checks": true
+    },
+    {
+      "variant": "mouse_renamed",
+      "steps": [
+        {
+          "command": "python3 scripts/validate.py",
+          "exit_code": 0
+        },
+        {
+          "command": "python3 scripts/check_combo_boot.py",
+          "exit_code": 0
+        },
+        {
+          "command": "python3 -m unittest discover -s tests -p test_*.py",
+          "exit_code": 0
+        }
+      ],
+      "keymap_unchanged_by_checks": true
+    },
+    {
+      "variant": "mouse_deleted",
+      "steps": [
+        {
+          "command": "python3 scripts/validate.py",
+          "exit_code": 0
+        },
+        {
+          "command": "python3 scripts/check_combo_boot.py",
+          "exit_code": 0
+        },
+        {
+          "command": "python3 -m unittest discover -s tests -p test_*.py",
+          "exit_code": 0
+        }
+      ],
+      "keymap_unchanged_by_checks": true
+    },
+    {
+      "variant": "game_and_symbol_edits",
+      "steps": [
+        {
+          "command": "python3 scripts/validate.py",
+          "exit_code": 0
+        },
+        {
+          "command": "python3 scripts/check_combo_boot.py",
+          "exit_code": 0
+        },
+        {
+          "command": "python3 -m unittest discover -s tests -p test_*.py",
+          "exit_code": 0
+        }
+      ],
+      "keymap_unchanged_by_checks": true
+    }
+  ],
+  "firmware_compiled": false,
+  "hardware_tested": false
+}
