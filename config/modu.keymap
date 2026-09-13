@@ -1,5 +1,5 @@
 /*
- * Obrey MODU-C rebuild 4.0 -- based on the uploaded original config ZIP.
+ * Obrey MODU-C rebuild 4.1 -- based on the uploaded original config ZIP.
  * Original MODU material: Copyright (c) 2026 EKS Inc.; created by Ryu.
  * SPDX-License-Identifier: LicenseRef-EKS-NonCommercial-1.0
  * Unofficial non-commercial modification; preserve LICENSE and NOTICE.md.
@@ -12,6 +12,10 @@
  * Base placeholders 51..56; slot 66 is neutral, not assumed nonexistent.
  * Board/trackball source revisions and metadata are retained from the ZIP.
  * Firmware build and physical tests are separate from source/host tests.
+ *
+ * 4.1: Base col-1 reordered -- Tab now sits above the cut/copy/paste block
+ * (which shifted down one row). Added df->Space and sd->Capslock combos
+ * (home-row, two-key, Base only -- same pattern as enter/back_space).
  */
 
 #define L_BASE  0
@@ -132,6 +136,22 @@
             layers = <L_BASE>;
         };
 
+        // Left-hand home-row combos, same pattern as enter/back_space above.
+
+        df_space {
+            timeout-ms = <50>;
+            key-positions = <27 28>;
+            bindings = <&kp SPACE>;
+            layers = <L_BASE>;
+        };
+
+        sd_capslock {
+            timeout-ms = <50>;
+            key-positions = <26 27>;
+            bindings = <&kp CAPSLOCK>;
+            layers = <L_BASE>;
+        };
+
         /* Intentional pairing-clear gesture: Nav held, then the 1 and 0 number keys together.
          * Not active on Game or FnMedia. Clears only the selected Bluetooth profile.
          */
@@ -154,10 +174,10 @@
             display-name = "Base";
             bindings = <
 &to L_GAME       &kp N1          &kp N2              &kp N3             &kp N4          &kp N5  &kp N6     &kp N7          &kp N8             &kp N9         &kp N0          &kp MINUS
-&mt LG(A) LG(Z)  &kp SLASH       &kp W               &kp E              &kp R           &kp T   &kp Y      &kp U           &kp I              &kp O          &kp SEMICOLON   &kp EQUAL
-&mt LG(X) LG(C)  &hm250 LCTRL A  &hm200 LALT S       &hm200 LEFT_GUI D  &hm200 LSHFT F  &kp G   &kp H      &hm200 LSHFT J  &hm200 LEFT_GUI K  &hm200 LALT L  &hm250 LCTRL P  &kp APOS
-&kp LG(V)        &kp Z           &kp X               &kp C              &kp V           &kp Q   &kp N      &kp M           &kp B              &kp COMMA      &kp PERIOD      &kp BSLH
-&kp TAB          &kp LBKT        &kp RBKT            &none              &none           &none   &none      &none           &none              &kp GRAVE      &mkp LCLK       &mkp RCLK
+&kp TAB          &kp SLASH       &kp W               &kp E              &kp R           &kp T   &kp Y      &kp U           &kp I              &kp O          &kp SEMICOLON   &kp EQUAL
+&mt LG(A) LG(Z)  &hm250 LCTRL A  &hm200 LALT S       &hm200 LEFT_GUI D  &hm200 LSHFT F  &kp G   &kp H      &hm200 LSHFT J  &hm200 LEFT_GUI K  &hm200 LALT L  &hm250 LCTRL P  &kp APOS
+&mt LG(X) LG(C)  &kp Z           &kp X               &kp C              &kp V           &kp Q   &kp N      &kp M           &kp B              &kp COMMA      &kp PERIOD      &kp BSLH
+&kp LG(V)        &kp LBKT        &kp RBKT            &none              &none           &none   &none      &none           &none              &kp GRAVE      &mkp LCLK       &mkp RCLK
 &kp ESC          &kp SPACE       &lt L_NAV CAPSLOCK                                             &kp ENTER  &kp BACKSPACE   &lt L_FN DEL       &trans
             >;
         };
