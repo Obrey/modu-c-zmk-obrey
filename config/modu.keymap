@@ -1,19 +1,37 @@
 /*
- * Obrey MODU-C v3 - five modes, explicit gaming controls.
- * Target: Obrey/modu-c-zmk-obrey (keep its board/module/build configuration).
- * Baseline: the conversation's modu-c-5layer/modu.keymap snapshot.
- * Baseline SHA-256: 1f6430158e4f0cb15097b1d0477433377dd519df8be9ecb835f70d9cc4841de8
- * Latest GitHub files, PCB mapping and firmware build were NOT reverified here.
+ * Obrey MODU-C v3.5 - number-row chord -> Maintenance -> physical Boot key.
+ * Target: Obrey/modu-c-zmk-obrey/config/modu.keymap
+ * Baseline: the v3.4 file attached in this conversation, NOT a live Git checkout.
+ * Board/PCB mapping, current repository validator and firmware build unverified.
  *
- * Layer order is intentional: FnMedia MUST be above Game for &mo L_FN.
- * Game has no transparent keys, home-row mods, mod-taps, layer-taps or macros.
- * Its Fn key is a plain momentary layer key, not a tap/hold decision.
+ * Existing layers keep their numbers: Base=0, Nav=1, Mouse=2, Game=3, FnMedia=4.
+ * Maintenance=5 is a new, temporary, normally blocked overlay.
  *
- * 67 binding slots retained. Only 51..56 are &none placeholders; slot 66 is kept transparent on Base.
- * Arrow target in the supplied editor grid: 46=UP, 57=LEFT,58=DOWN,59=RIGHT.
- * This slot grid is NOT a new/verified physical-layout or matrix-transform file.
- * No change to GPIO, firmware module, physical trackball listener, or BLE roles.
- * Compile and verify key positions before using this on the device.
+ * Start in Base; release other keys and pause briefly (at least 300 ms).
+ * LEFT:  press 1 + 5 together (positions 1,5, within 80 ms), keep BOTH held,
+ *        then press the left EXTRA-ROW Tab (position 48) -> left bootloader.
+ * RIGHT: press 6 + 0 together (positions 6,10, within 80 ms), keep BOTH held,
+ *        then press the right backslash key (position 47) -> right bootloader.
+ * Do not press all three at once: form the two-number chord first.
+ *
+ * The combos only run &mo L_MAINT. Boot is invoked by an actual key event,
+ * not by a combo or macro, retaining ZMK's source-specific reset behavior.
+ * Neither new combo is enabled on Nav/Mouse/Game/FnMedia/Maintenance.
+ * No slow-release: releasing EITHER chord key ends Maintenance.
+ * Both Boot keys are available in the shared Maintenance layer; the final
+ * physical key, NOT the choice of entry chord, selects which half is reset.
+ * Maintenance positions 0 and 11 return to Base; all other keys are blocked
+ * except the two Boot keys. This overlay does not disable physical trackballs.
+ *
+ * Base bracket/backtick are restored to plain &kp. No 3-second Boot hold,
+ * reboot shortcut, extra thumb binding, or replacement shortcut column.
+ * Game/Nav/Mouse/FnMedia bindings and existing combos are retained from v3.4.
+ * Base positions 51..56 are the only &none slots; Base 66 remains &trans.
+ *
+ * USB flashing requires a DATA cable to the half being flashed. Keep the
+ * other half running/connected; finish one half and reconnect before the next.
+ * A peripheral cannot process these shortcuts without its running central.
+ * Install this keymap in firmware first; physical reset remains the fallback.
  */
 
 #define L_BASE  0
@@ -21,6 +39,7 @@
 #define L_MOUSE 2
 #define L_GAME  3
 #define L_FN    4
+#define L_MAINT 5
 
 #define ZMK_POINTING_DEFAULT_MOVE_VAL 1200
 #define ZMK_POINTING_DEFAULT_SCRL_VAL 25
@@ -78,6 +97,24 @@
 
     combos {
         compatible = "zmk,combos";
+
+        /* Maintenance entry only. A separate physical key invokes Boot.
+         * No slow-release: BOTH number keys must remain held.
+         */
+        combo_maint_left {
+            timeout-ms = <80>;
+            require-prior-idle-ms = <300>;
+            key-positions = <1 5>;
+            bindings = <&mo L_MAINT>;
+            layers = <L_BASE>;
+        };
+        combo_maint_right {
+            timeout-ms = <80>;
+            require-prior-idle-ms = <300>;
+            key-positions = <6 10>;
+            bindings = <&mo L_MAINT>;
+            layers = <L_BASE>;
+        };
 
         /* No combo is active on Game or FnMedia. */
         mouse {
@@ -165,16 +202,31 @@
             >;
         };
 
-        // Highest, momentary overlay: F1..F12, media, connection controls, leftover punctuation.
+        // Fn overlay above Game; Maintenance is a separate higher overlay.
         FnMedia {
             display-name = "FnMedia";
             bindings = <
-                /* 00..11 */ &kp F11                 &kp F1                  &kp F2                  &kp F3                  &kp F4                  &kp F5                  &kp F6                  &kp F7                  &kp F8                  &kp F9                  &kp F10                 &kp F12
-                /* 12..23 */ &trans                  &kp GRAVE               &kp PSCRN               &kp SLCK                &kp C_PAUSE             &kp CAPSLOCK            &bt BT_SEL 0            &bt BT_SEL 1            &bt BT_SEL 2            &bt BT_SEL 3            &bt BT_SEL 4            &kp K_APP
-                /* 24..35 */ &trans                  &trans                  &trans                  &trans                  &trans                  &trans                  &kp C_PREV              &kp C_PP                &kp C_NEXT              &kp C_VOL_DN            &kp C_VOL_UP            &kp C_MUTE
-                /* 36..47 */ &trans                  &kp LBKT                &kp RBKT                &mkp MCLK               &msc SCRL_UP            &msc SCRL_DOWN          &out OUT_USB            &out OUT_BLE            &out OUT_TOG            &kp APOS                &trans                  &to L_MOUSE
-                /* 48..59 */ &trans                  &trans                  &trans                  &none                   &none                   &none                   &none                   &none                   &none                   &trans                  &trans                  &trans
-                /* 60..66 */ &trans                  &trans                  &trans                  &trans                  &trans                  &trans                  &none
+                /* 00..11 */ &kp F11                    &kp F1                     &kp F2                     &kp F3                     &kp F4                     &kp F5                     &kp F6                     &kp F7                     &kp F8                     &kp F9                     &kp F10                    &kp F12
+                /* 12..23 */ &trans                     &kp GRAVE                  &kp PSCRN                  &kp SLCK          &kp C_PAUSE      &kp CAPSLOCK               &bt BT_SEL 0               &bt BT_SEL 1               &bt BT_SEL 2               &bt BT_SEL 3               &bt BT_SEL 4               &kp K_APP
+                /* 24..35 */ &trans                     &trans                     &trans                     &trans                     &trans                     &trans                     &kp C_PREV                 &kp C_PP                   &kp C_NEXT                 &kp C_VOL_DN               &kp C_VOL_UP               &kp C_MUTE
+                /* 36..47 */ &trans                     &kp LBKT                   &kp RBKT                   &mkp MCLK                  &msc SCRL_UP               &msc SCRL_DOWN             &out OUT_USB               &out OUT_BLE               &out OUT_TOG               &kp APOS                   &trans                     &to L_MOUSE
+                /* 48..59 */ &trans                     &trans                     &trans                     &none                      &none                      &none                      &none                      &none                      &none                      &trans                     &trans                     &trans
+                /* 60..66 */ &trans                     &trans                     &trans                     &trans                     &trans                     &trans                     &none
+            >;
+        };
+
+        // 5: Boot keys are ordinary physical bindings, never combo outputs.
+        // 0/11: exit to Base. 47: right Boot. 48: left extra-row Boot.
+        // Other new key presses are blocked until the entry chord is released.
+        maintenance_layer {
+            display-name = "Maintenance";
+            bindings = <
+                /* 00..11 */ &to L_BASE              &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &to L_BASE
+                /* 12..23 */ &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none
+                /* 24..35 */ &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none
+                /* 36..47 */ &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &bootloader
+                /* 48..59 */ &bootloader             &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none                   &none
+                /* 60..66 */ &none                   &none                   &none                   &none                   &none                   &none                   &none
             >;
         };
     };
