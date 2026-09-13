@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="918" height="419" viewBox="0 0 918 419">
 <rect width="100%" height="100%" fill="white"/>
 <style>text{font-family:Arial,sans-serif;fill:#111}.key{fill:#f7f7f7;stroke:#222;stroke-width:1.2}.none{fill:#ddd;stroke:#777;stroke-width:0.8}.title{font-weight:700;font-size:18px}.note{font-size:12px;fill:#555}.label{font-size:11px;text-anchor:middle;dominant-baseline:middle}</style>
-<text x="24" y="18" class="title">Original example — NOT the Obrey keymap</text>
+<text x="24" y="18" class="title">MODU-C default layer — Keymap Editor layout</text>
 <rect class="key" x="24.0" y="40.0" width="55.0" height="55.0" rx="5"/>
 <text class="label" x="51.5" y="67.5">ESC</text>
 <rect class="key" x="82.0" y="40.0" width="55.0" height="55.0" rx="5"/>

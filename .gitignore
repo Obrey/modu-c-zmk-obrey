@@ -7,5 +7,3 @@ __pycache__/
 *.uf2
 .DS_Store
 Thumbs.db
-# Local reports can be regenerated, but delivered reports are intentional.
-*.backup-*/

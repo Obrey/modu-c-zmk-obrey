@@ -240,8 +240,7 @@ def check_build_files() -> None:
 
     expected_cmake = (
         "-DZMK_EXTRA_MODULES=${GITHUB_WORKSPACE}/modu-c-firmware/modu-module;"
-        "${GITHUB_WORKSPACE}/modu-c-firmware/zmk-pmw3610-driver;"
-        "${GITHUB_WORKSPACE}/local-modules/obrey-combo-boot"
+        "${GITHUB_WORKSPACE}/modu-c-firmware/zmk-pmw3610-driver"
     )
     for entry in entries:
         try:

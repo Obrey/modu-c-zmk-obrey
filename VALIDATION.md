@@ -1,60 +1,56 @@
-# Rebuild verification — 2026-09-13
+# Validation report
 
-This report applies to the uploaded-original-based Obrey rebuild, not an
-uninspected live GitHub branch. The original historical report is preserved
-as `reference/UPSTREAM_VALIDATION.md`.
+Audited: 2026-09-02
 
-## Actually executed in this environment
+## Upstream correspondence checked
 
-1. The uploaded original repository's unmodified `scripts/validate.py` and
-   `scripts/selftest.py`, before modification: PASS.
-2. The original unmodified metadata and keymap validation functions, applied
-   to the rebuilt repository: PASS.
-3. Rebuilt `scripts/validate.py`: PASS. Its sole logic change is adding the
-   explicit nested behavior-module path to the exact expected CMake argument.
-   All original pins, target order, placeholder rules, license checks,
-   workflow/package checks and quoted-list checks remain enforced.
-4. Rebuilt `scripts/selftest.py` (unchanged): PASS for HEX/UF2 synthetic fixtures.
-   These fixtures are NOT compiled MODU firmware.
-5. `scripts/check_combo_boot.py`: PASS. Five 67-entry layers, matching three-key
-   combo/observer positions, Base-only scope, ordinary symbol restoration,
-   nested-module wiring, and devicetree property-before-child order.
-6. 32 Python tests: PASS (22 repository checks/mutations; 10 safe-copy tests).
-7. Actual C observer/dispatcher source compiled on the host against mocked
-   ZMK/Zephyr APIs and transport: 25 scenarios PASS, repeated with behavior
-   metadata both disabled and enabled. The compiler uses -Wall -Wextra -Werror.
-8. Every ordinary layer binding compared with the agreed v3.6: all 335 unchanged.
-9. YAML syntax, Python syntax, Bash syntax for workflow shell blocks, archive
-   CRC/path/duplicate checks, and extracted-byte comparison: PASS.
+- `config/modu.keymap` is based on MODU-C upstream revision `bee0bb4b812f63f279eb67e928accc89600b5904` and keeps 67 behavior bindings in every customized layer.
+- Layout metadata contains the exact 67 `(row, col)` entries from the upstream `default_transform`: rows 0–4, columns 0–11, followed by row 5 columns 0, 1, 2, 6, 7, 8, and 9.
+- The build matrix uses the upstream board and shield names exactly: `ms88sf3/nrf52840`, `modu_left`, and `modu_right`.
+- The additional module paths match the original build script: `modu-module` and `zmk-pmw3610-driver`.
+- The fallback conversion uses the same nRF52840 UF2 family ID as the original build script: `0xADA52840`.
+- The west manifest and reusable workflow use fixed ZMK and MODU-C source revisions rather than moving branch names.
 
-## Improvements over the earlier generic patch
+## Automated local checks passed
 
-- No root `zephyr/module.yml`: avoid the reusable workflow moving the west
-  workspace while hardware CMake paths still reference GITHUB_WORKSPACE.
-- Use `local-modules/`, not west's cached `modules/` dependency directory,
-  so dependency-cache restoration cannot replace the custom source files.
-- A single explicit ZMK_EXTRA_MODULES argument contains the two original modules
-  plus `local-modules/obrey-combo-boot` for each half. No duplicate -D flag overwrite.
-- Keep one original pinned workflow, with all original UF2 conversion/validation
-  and notices. No separate moving-branch workflow bypassing packaging.
-- Properties precede child nodes in the keymap; the earlier preview's misplaced
-  combo `compatible` property is not carried forward.
-- Source observer re-arms safely after a remote boot prevented key-up packets;
-  stale replays and incomplete replacement chords still cannot reset a device.
-- Unknown/mixed/stale input or dispatch failures never silently reset the central.
-- Existing scripts are retained and extended, not disabled to get past an error.
-- Backup copier detects known incompatible legacy patch files and removes only
-  recognized generated files after backing them up. Git history/remotes unchanged.
+- Strict JSON parsing, including duplicate-key detection.
+- `config/modu.json` and `config/info.json` semantic equality.
+- 67 unique layout coordinates in exact firmware-transform order.
+- Six tiny visual placeholders at row 4, columns 3–8.
+- Every keymap layer contains exactly 67 behavior references.
+- Default-layer `&none` entries occur only at zero-based binding positions 51–56.
+- Exact left/right matrix targets, artifact names, source revisions, module paths, and CMake-list quoting.
+- Python syntax compilation for all validation and packaging scripts.
+- YAML parsing for `build.yaml`, `config/west.yml`, and the GitHub Actions workflow.
+- Shell syntax checking for every workflow shell block.
+- ZIP path safety, duplicate-entry detection, archive CRC testing, hidden `.github` retention, and extracted-byte comparison.
 
-## Explicitly not executed
+## Packaging safeguards tested
 
-- Fetching the pinned ZMK/Zephyr/hardware dependency trees.
-- Actual ARM firmware compilation or linking; no UF2 build output was produced.
-- GitHub Actions, physical flashing, source-specific reset over real BLE,
-  scanning, trackballs, power states, or Keymap Editor round-trip.
-- Windows execution of INSTALL.cmd; its Python copier was tested on the host.
+The dependency-free `scripts/selftest.py` exercises both success and failure paths:
 
-The configuration ZIP is suitable for the next integration-build step, but
-is not a hardware-certified firmware release. Do not treat host mock tests as
-proof that the real remote half has received a command. Retain a known-good
-firmware and a physical reset method when first testing.
+- Valid Intel HEX with CRLF, a terminal newline, and an extra blank line is validated and normalized.
+- Corrupt Intel HEX checksums, non-hex characters, invalid control-record addresses, and data records crossing a 16-bit segment boundary are rejected.
+- Native UF2 selection works for both halves.
+- HEX conversion routing works with a test converter and verifies that the converter receives no terminal blank line.
+- Missing or duplicate left/right build outputs are rejected instead of being guessed.
+- UF2 start/end magic, block numbering, declared block count, payload size, address alignment, non-overlap, 32-bit address bounds, family flag, and family ID are checked.
+- Wrong-family and malformed UF2 files are rejected.
+- Byte-identical left/right outputs are rejected as a likely packaging mistake.
+
+## Hardening applied during this audit
+
+- Replaced count-only `&none` validation with exact-position validation.
+- Replaced “find any two files” packaging with exact per-half filename selection.
+- Added Intel HEX canonicalization before using the pinned upstream converter. This prevents a terminal blank line from reaching a converter parser that indexes every split line.
+- Added final UF2 binary validation and a second verification step before artifact upload.
+- Added workflow triggers for every script and license/notice file that affects the final artifact.
+- Corrected the Microsoft UF2 license-file path in `THIRD_PARTY_NOTICES.md`.
+
+## Not executed in this environment
+
+- `west update` and the complete ZMK/Zephyr compilation.
+- The GitHub-hosted reusable workflow itself.
+- Flashing or functional testing on a physical MODU-C.
+
+The first successful GitHub Actions run is therefore still the integration-build proof. A successful build plus the automatic UF2 checks gives strong evidence that the files are correctly assembled, but only a physical flash can confirm bootloader compatibility, scanning, Bluetooth, LEDs, and both trackballs on the actual keyboard.
