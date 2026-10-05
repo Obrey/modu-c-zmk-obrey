@@ -194,11 +194,13 @@ def check_keymap() -> None:
         )
 
     expected_entry_counts = {
-        "&lt L_FN ESC": 2,
+        "&lt L_FN ESC": 1,
         "&mo L_FN": 1,
-        "&lt L_MOUSE SPACE": 1,
-        "&lt L_NUM BACKSPACE": 1,
-        "&lt L_SYM ENTER": 1,
+        "&lt L_NAV CAPSLOCK": 1,
+        "&lt 1 V": 1,
+        "&lt 5 N": 1,
+        "&lt 2 M": 1,
+        "&lt 4 RBKT": 1,
     }
     for binding, expected_count in expected_entry_counts.items():
         actual_count = text.count(binding)
