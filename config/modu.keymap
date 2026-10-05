@@ -10,9 +10,8 @@
  * Boot uses standard positional hold-taps + direct source-specific &bootloader.
  * Base typing combos: D+F -> Caps Lock, S+D -> Space.
  * Base left macro column: Tab -> Undo/Select -> Cut/Copy -> Paste.
- * Hold N for Numpad, M for Mouse, V or Caps for Nav, and right bracket for FnMedia.
- * Hold right Enter for SymbolPad; tapping it still sends Enter.
- * Base Escape and Space thumbs send those keys directly; FnMedia is on right bracket.
+ * Hold N for Numpad, M for Mouse, V for Nav, and right bracket for FnMedia.
+ * The thumb keys send Escape, Space, Caps Lock, Enter, Backspace, and Delete directly.
  * No custom boot behavior required. Existing hardware/trackball modules remain required.
  * No RGB underglow bindings or RGB include are used.
  * Base placeholders 51..56; slot 66 is neutral, not assumed nonexistent.
@@ -186,7 +185,7 @@
 &mt LG(A) LG(Z)  &hm250 LCTRL A  &hm200 LALT S       &hm200 LEFT_GUI D  &hm200 LSHFT F  &kp G              &kp H              &hm200 LSHFT J  &hm200 LEFT_GUI K  &hm200 LALT L  &hm250 LCTRL P  &kp APOS
 &mt LG(X) LG(C)  &kp Z           &kp X               &kp C              &lt 1 V         &kp Q              &lt 5 N            &lt 2 M         &kp B              &kp COMMA      &kp PERIOD      &kp BSLH
 &kp LG(V)        &kp LBKT        &lt 4 RBKT          &none              &none           &none              &none              &none           &none              &kp GRAVE      &mkp LCLK       &mkp RCLK
-&kp ESCAPE       &kp SPACE       &lt L_NAV CAPSLOCK                                                        &lt L_SYM ENTER     &kp BACKSPACE   &kp DEL            &trans
+&kp ESCAPE       &kp SPACE       &kp CAPSLOCK                                                          &kp ENTER          &kp BACKSPACE   &kp DEL            &trans
             >;
         };
 
