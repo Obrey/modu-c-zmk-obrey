@@ -196,6 +196,7 @@ def check_keymap() -> None:
     expected_entry_counts = {
         "&lt L_FN ESC": 1,
         "&mo L_FN": 1,
+        "&lt L_SYM ENTER": 1,
         "&lt L_NAV CAPSLOCK": 1,
         "&lt 1 V": 1,
         "&lt 5 N": 1,
